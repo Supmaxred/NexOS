@@ -1,8 +1,8 @@
-# NexOS
+<p align="center">
+  <img src="nexlogo.png" alt="NexOS Logo">
+</p>
 
-![NexOS Logo](nexlogo.png)
-
-NexOS is a 32-bit operating system built on the principles of multi-booting. Instead of traditional Makefiles, it utilizes Python scripts for its build process.
+NexOS is a 32-bit operating system. Instead of traditional Makefiles, it utilizes Python scripts for its build process.
 
 ## Contents
 
@@ -26,20 +26,14 @@ The repository is organized as follows:
   - `inc/`: Header files.
   - `isobuild/`: Files necessary for ISO creation.
   - `src/`: Source code for kernel components.
-    - `boot/`: Bootloader code.
-    - `drivers/`: Device drivers.
-      - `kbd/`: Keyboard driver.
-      - `timer/`: Timer driver.
-    - `kernel/`: Kernel implementation.
-    - `klibc/`: Basic C library functions.
 
 ## Building NexOS
 
-To build NexOS, ensure Python is installed on your system. Then, navigate to the `NexOS/` directory and run the `run.py` script. This will compile the source code and generate the necessary object files.
+To build NexOS, ensure Python3 is installed on your system. Then, navigate to the `NexOS/` directory and run the `run.py` script. This will compile the source code and generate the necessary object files.
 
 ## Running NexOS
 
-Once built, you can run NexOS using an emulator such as Bochs. Simply execute the generated ISO file `nexos.iso` within the emulator environment.
+Once built, run.pu automatically runs NexOS with QEMU
 
 ## Contributing
 
