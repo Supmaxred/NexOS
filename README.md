@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="nexlogo.png" alt="NexOS Logo">
+  <img src="nexlogo.png" alt="NexOS Logo" width="400">
 </p>
 
 NexOS is a 32-bit operating system. Instead of traditional Makefiles, it utilizes Python scripts for its build process.
