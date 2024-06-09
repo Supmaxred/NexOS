@@ -1,0 +1,55 @@
+00000000000i[      ] Bochs x86 Emulator 2.7
+00000000000i[      ]   Built from SVN snapshot on August  1, 2021
+00000000000i[      ]   Timestamp: Sun Aug  1 10:07:00 CEST 2021
+00000000000i[      ] System configuration
+00000000000i[      ]   processors: 1 (cores=1, HT threads=1)
+00000000000i[      ]   A20 line support: yes
+00000000000i[      ] IPS is set to 4000000
+00000000000i[      ] CPU configuration
+00000000000i[      ]   SMP support: yes, quantum=16
+00000000000i[      ]   level: 6
+00000000000i[      ]   APIC support: xapic
+00000000000i[      ]   FPU support: yes
+00000000000i[      ]   MMX support: yes
+00000000000i[      ]   3dnow! support: yes
+00000000000i[      ]   SEP support: yes
+00000000000i[      ]   SIMD support: sse2
+00000000000i[      ]   XSAVE support: no 
+00000000000i[      ]   AES support: no
+00000000000i[      ]   SHA support: no
+00000000000i[      ]   MOVBE support: no
+00000000000i[      ]   ADX support: no
+00000000000i[      ]   x86-64 support: yes
+00000000000i[      ]   1G paging support: no
+00000000000i[      ]   MWAIT support: yes
+00000000000i[      ]   VMX support: 1
+00000000000i[      ]   SVM support: no
+00000000000i[      ] Optimization configuration
+00000000000i[      ]   RepeatSpeedups support: yes
+00000000000i[      ]   Fast function calls: yes
+00000000000i[      ]   Handlers Chaining speedups: no
+00000000000i[      ] Devices configuration
+00000000000i[      ]   PCI support: i440FX i430FX i440BX
+00000000000i[      ]   Network devices support: NE2000 E1000
+00000000000i[      ]   Sound support: SB16 ES1370
+00000000000i[      ]   USB support: UHCI OHCI EHCI xHCI
+00000000000i[      ]   VGA extension support: vbe cirrus voodoo
+00000000000i[IMG   ] Disk image modules
+00000000000i[IMG   ]   flat concat sparse dll growing undoable volatile vbox
+00000000000i[IMG   ]   vmware4 vvfat vmware3 vpc
+00000000000i[NETCTL] Networking modules
+00000000000i[NETCTL]   null socket slirp linux vde tuntap vnet
+00000000000i[SNDCTL] Sound drivers
+00000000000i[SNDCTL]   dummy oss sdl file alsa
+00000000000i[USBCTL] Pluggable USB devices
+00000000000i[USBCTL]   disk cdrom mouse tablet keypad keyboard floppy hub
+00000000000i[USBCTL]   printer
+00000000000i[MEM0  ] allocated memory at 0x7fc99de6f010. after alignment, vector=0x7fc99de70000
+00000000000i[MEM0  ] 32.00MB
+00000000000i[MEM0  ] mem block size = 0x00020000, blocks=256
+00000000000i[MEM0  ] rom at 0xffff0000/65536 ('/usr/share/bochs/BIOS-bochs-legacy')
+00000000000i[CPU0  ] WARNING: 3DNow! is not implemented yet !
+00000000000i[DEV   ] will paste characters every 100 iodev timer ticks
+00000000000i[      ] lt_dlhandle is 0x564a3074dd70
+00000000000i[PLUGIN] loaded plugin libbx_soundalsa.so
+00000000000i[      ] lt_dlhandle is 0x564a30760ed0

@@ -1,0 +1,24 @@
+{
+    "files.associations": {
+        "*.embeddedhtml": "html",
+        "keymap.h": "c",
+        "display.h": "c",
+        "cpuio.h": "c",
+        "serialport.h": "c",
+        "rand": "c",
+        "stdlib.h": "c",
+        "stdint.h": "c",
+        "multiboot.h": "c",
+        "global.h": "c",
+        "xpfont.h": "c",
+        "cross-stdarg.h": "c",
+        "video.h": "c",
+        "stdarg.h": "c",
+        "ctype.h": "c",
+        "int.h": "c",
+        "kshell.h": "c",
+        "stdio.h": "c",
+        "types.h": "c",
+        "features.h": "c"
+    }
+}
