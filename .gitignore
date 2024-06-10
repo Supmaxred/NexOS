@@ -1,3 +1,7 @@
+nexos.iso
+bochsdbg.txt
+bochsout.txt
+
 # Prerequisites
 *.d
 
@@ -50,6 +54,3 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-nexos.iso
-bochsdbg.txt
-bochsout.txt
