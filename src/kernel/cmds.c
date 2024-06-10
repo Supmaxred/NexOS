@@ -116,7 +116,7 @@ int cmd_uptime(int argc, char** argv)
         }
     }
 
-    uint32_t ms = kernel_ticks;
+    uint32_t ms = kernel_time;
 
     uint32_t s = ms / 1000;
     ms = ms % 1000;

@@ -2,9 +2,12 @@
 #include "cpu.h"
 #include "global.h"
 
+uint32_t pit_delay = 1;
+
 void pit_irqhandler(irqctx_t ctx)
 {
-    kernel_ticks++;
+    kernel_tick++;
+    kernel_time += pit_delay;
 }
 
 void pit_init(uint32_t freq)
@@ -26,4 +29,6 @@ void pit_init(uint32_t freq)
     // Send the frequency divisor
     outb(0x40, low);
     outb(0x40, high);
+
+    pit_delay = 1000 / freq;
 }

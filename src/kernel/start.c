@@ -12,14 +12,15 @@
 multiboot_info_t* multiboot;
 uint32_t kernelcs;
 uint32_t kernelds;
-uint32_t kernel_ticks = 0;
+uint32_t kernel_tick = 0;
+uint32_t kernel_time = 0;
 
 void sleep(uint32_t ms)
 {
-    uint32_t curticks = kernel_ticks;
-    uint32_t tarticks = curticks + ms;
+    uint32_t curtime = kernel_time;
+    uint32_t tartime = curtime + ms;
 
-    while(kernel_ticks < tarticks)
+    while(kernel_time < tartime)
         halt();
 }
 
@@ -143,7 +144,7 @@ void kernel_main(uint32_t ds, uint32_t cs, multiboot_info_t* _multiboot)
     pckbd_init();
     pit_init(1000);
 
-        read_rtc();
+    read_rtc();
     printf("\n\n\n\n\n%i %i %i:%i:%i %i", day, month, hour, minute, second, year);
 
     kshell_main();
