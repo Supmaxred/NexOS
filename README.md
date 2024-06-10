@@ -33,7 +33,7 @@ To build NexOS, ensure Python3 is installed on your system. Then, navigate to th
 
 ## Running NexOS
 
-Once built, run.pu automatically runs NexOS with QEMU
+Once built, run.py automatically runs NexOS with QEMU
 
 ## Contributing
 
