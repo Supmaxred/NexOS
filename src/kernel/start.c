@@ -142,7 +142,7 @@ void kernel_main(uint32_t ds, uint32_t cs, multiboot_info_t* _multiboot)
     init_serial();
     fb_init();
     pckbd_init();
-    pit_init(1000);
+    pit_init(50);
 
     read_rtc();
     printf("\n\n\n\n\n%i %i %i:%i:%i %i", day, month, hour, minute, second, year);

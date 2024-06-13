@@ -1,6 +1,7 @@
 #include "i386/int.h"
 #include "cpu.h"
 #include "global.h"
+#include "serialport.h"
 
 uint32_t pit_delay = 1;
 
