@@ -3,8 +3,6 @@
 #include "res.h"
 #include "serialport.h"
 
-#define PIXELADDR(x, y, w) ((y) * (w) + (x))
-
 uint32_t* fb_addr;
 uint32_t fb_pitch;
 uint32_t fb_width;
@@ -25,27 +23,6 @@ void fb_init()
     dbg_printf("fb_height - %i\n", fb_height);
     dbg_printf("fb_bpp - %i\n", fb_bpp);
     dbg_printf("fb_type - %i\n\n", multiboot->framebuffer_type);
-}
-
-uint32_t* fb_pixeladdr(uint32_t x, uint32_t y) 
-{
-    return fb_addr + PIXELADDR(x, y, fb_width);
-}
-
-void fb_setpixel(uint16_t x, uint16_t y, color_t col)
-{
-    if(x >= fb_width || y >= fb_height)
-        return;
-
-    *((uint32_t*)fb_pixeladdr(x, y)) = col;
-}
-
-color_t fb_getpixel(uint16_t x, uint16_t y)
-{
-    if(x >= fb_width || y >= fb_height)
-        return 0;
-
-    return *((uint32_t*)fb_pixeladdr(x, y));
 }
 
 void fb_drawrect(const rect_t* rect, color_t col)

@@ -70,10 +70,12 @@ int cmd_reboot(int argc, char** argv)
     while (good & 0x02)
         good = inb(0x64);
     outb(0x64, 0xFE);
-    printf("Failed to reboot by 8042, trying exc.\n");
+    printf("Failed to safe-reboot, trying to fire up CPU.\n");
     idt_setentry(13, (void*)0x0, 0x0, 0x8E);
     idt_setentry(8, (void*)0x0, 0x0, 0x8E);
     idt_setentry(6, (void*)0x0, 0x0, 0x8E);
+    idt_setentry(5, (void*)0x0, 0x0, 0x8E);
+    idt_setentry(0, (void*)0x0, 0x0, 0x8E);
     void (*rf)();
     rf = (void (*)())0x0;
     rf();
@@ -85,7 +87,7 @@ int cmd_sleep(int argc, char** argv)
         return -1;
 
     uint32_t ms = 1000;
-    if(argc == 2)
+    if(argc > 1)
         ms = stoi(argv[1]);
     
     sleep(ms);

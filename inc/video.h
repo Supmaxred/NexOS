@@ -8,6 +8,8 @@
 #define B_PART(c) ((c) & 0xff)
 #define A_PART(c) ((c) >> 24 & 0xff)
 
+#define PIXELADDR(x, y, w) ((y) * (w) + (x))
+
 typedef uint32_t color_t;
 
 typedef struct rect {
@@ -25,11 +27,26 @@ extern uint8_t fb_bpp;
 
 void fb_init();
 
-uint32_t* fb_pixeladdr(uint32_t x, uint32_t y);
+static inline uint32_t* fb_pixeladdr(uint32_t x, uint32_t y) 
+{
+    return fb_addr + PIXELADDR(x, y, fb_width);
+}
 
-void fb_setpixel(uint16_t x, uint16_t y, color_t col);
+static inline void fb_setpixel(uint16_t x, uint16_t y, color_t col)
+{
+    if(x >= fb_width || y >= fb_height)
+        return;
 
-color_t fb_getpixel(uint16_t x, uint16_t y);
+    *((uint32_t*)fb_pixeladdr(x, y)) = col;
+}
+
+static inline color_t fb_getpixel(uint16_t x, uint16_t y)
+{
+    if(x >= fb_width || y >= fb_height)
+        return 0;
+
+    return *((uint32_t*)fb_pixeladdr(x, y));
+}
 
 void fb_drawrect(const rect_t* rect, color_t col);
 
