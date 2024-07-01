@@ -8,7 +8,8 @@
 
 extern multiboot_info_t* multiboot;
 extern uint32_t kernelcs;
-extern uint32_t kernel_tick;
-extern uint32_t kernel_time;
+extern uint32_t ke_ticks;
+extern uint32_t ke_clock;
+extern uint32_t ke_systime;
 
 void sleep(uint32_t ms);

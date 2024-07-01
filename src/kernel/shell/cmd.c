@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "cpu.h"
 #include "global.h"
@@ -118,7 +119,7 @@ int cmd_uptime(int argc, char** argv)
         }
     }
 
-    uint32_t ms = kernel_time;
+    uint32_t ms = ke_clock;
 
     uint32_t s = ms / 1000;
     ms = ms % 1000;
@@ -134,4 +135,11 @@ int cmd_uptime(int argc, char** argv)
         printf(":%i", ms);
     
     printf("\n");
+}
+
+int cmd_date(int argc, char** argv)
+{
+    time_t curtim = time(NULL);
+    struct tm* curdat = localtime(&curtim);
+    printf("%s", asctime(curdat));
 }

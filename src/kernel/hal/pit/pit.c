@@ -4,15 +4,26 @@
 #include "serialport.h"
 
 uint32_t pit_delay = 1;
+uint32_t pit_freq = 1;
+
+static uint32_t counter = 0;
 
 void pit_irqhandler(irqctx_t ctx)
 {
-    kernel_tick++;
-    kernel_time += pit_delay;
+    ke_ticks++;
+    ke_clock += pit_delay;
+
+    if(++counter >= pit_freq)
+    {
+        counter -= pit_freq;
+        ke_systime++;
+    }
 }
 
 void pit_init(uint32_t freq)
 {
+    counter = 0;
+
     idt_setirqhandler(0, pit_irqhandler, 1);
 
     // The value sent to the PIT is the value to divide its input clock
@@ -31,5 +42,6 @@ void pit_init(uint32_t freq)
     outb(0x40, low);
     outb(0x40, high);
 
+    pit_freq = freq;
     pit_delay = 1000 / freq;
 }

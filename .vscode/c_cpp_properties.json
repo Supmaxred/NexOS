@@ -1,16 +1,17 @@
 {
   "configurations": [
     {
-      "name": "windows-gcc-x64",
-      "includePath": [
-        "${workspaceFolder}/**"
-      ],
-      "defines": [],
-      "compilerPath": "gcc",
-      "cStandard": "${default}",
-      "cppStandard": "${default}",
-      "intelliSenseMode": "windows-gcc-x64"
+        "name": "Linux",
+        "includePath": [
+            "${workspaceFolder}/**",
+            "${workspaceFolder}/inc"
+        ],
+        "defines": [],
+        "compilerPath": "/usr/bin/gcc",
+        "cStandard": "c17",
+        "cppStandard": "c++98",
+        "intelliSenseMode": "linux-gcc-x64"
     }
-  ],
-  "version": 4
+],
+"version": 4
 }

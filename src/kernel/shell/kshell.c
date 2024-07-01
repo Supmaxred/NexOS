@@ -27,6 +27,7 @@ CMDDEF(calc);
 CMDDEF(reboot);
 CMDDEF(sleep);
 CMDDEF(uptime);
+CMDDEF(date);
 
 cmd_t cmds[] = {
     CMD_ENTRY(echo),
@@ -35,6 +36,7 @@ cmd_t cmds[] = {
     CMD_ENTRY(reboot),
     CMD_ENTRY(sleep),
     CMD_ENTRY(uptime),
+    CMD_ENTRY(date),
 };
 
 void kshell_drawlogo()
