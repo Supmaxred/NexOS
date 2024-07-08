@@ -1,5 +1,5 @@
 #include "video.h"
-#include "global.h"
+#include "ke.h"
 #include "res.h"
 #include "serialport.h"
 

@@ -25,6 +25,8 @@
     "struct_tm.h": "c",
     "timesize.h": "c",
     "time_t.h": "c",
-    "struct_timespec.h": "c"
+    "struct_timespec.h": "c",
+    "arch.h": "c",
+    "ke.h": "c"
   }
 }

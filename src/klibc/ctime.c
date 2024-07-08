@@ -1,6 +1,6 @@
 #include <time.h>
 #include <stdint.h>
-#include "global.h"
+#include <ke.h>
 
 //gmtime
 #define SECMIN 60

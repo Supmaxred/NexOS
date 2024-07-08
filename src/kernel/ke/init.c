@@ -1,14 +1,11 @@
 #include <stdio.h>
 
-#include "global.h"
 #include "video.h"
 #include "serialport.h"
-#include "i386/int.h"
+#include "i386/arch.h"
 #include "kshell.h"
 #include "pckbd.h"
-#include "pit.h"
-#include "cpu.h"
-#include "hal.h"
+#include "ke.h"
 
 multiboot_info_t* multiboot;
 

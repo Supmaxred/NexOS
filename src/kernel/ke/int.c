@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include "i386/int.h"
+#include "i386/arch.h"
 #include "serialport.h"
-#include "cpu.h"
-#include "global.h"
+#include "ke.h"
+
 
 idt_entry_t idt_table[256];
 

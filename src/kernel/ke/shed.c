@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <stdio.h>
-#include <unistd.h>
 
 typedef struct
 {
@@ -37,7 +36,6 @@ context shedctx;
 void switch_context(context* a, context* b)
 {
     printf("%i -> %i\n", a->ip, b->ip);
-    usleep(500000);
 }
 
 proc* alloc_proc()

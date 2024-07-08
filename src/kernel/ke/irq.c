@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "cpu.h"
+#include "i386/arch.h"
 
 #define PIC1		0x20		/* IO base address for master PIC */
 #define PIC2		0xA0		/* IO base address for slave PIC */

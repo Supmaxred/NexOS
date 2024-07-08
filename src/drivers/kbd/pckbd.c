@@ -1,8 +1,7 @@
-#include "i386/int.h"
+#include "i386/arch.h"
 #include <stdint.h>
 #include <ctype.h>
 #include "kbd_keymap.h"
-#include "cpu.h"
 
 #define KEYBOARD_DATA_PORT 0x60
 #define KEYBOARD_STATUS_PORT 0x64

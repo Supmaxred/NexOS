@@ -2,10 +2,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
-
-#include "cpu.h"
-#include "global.h"
-#include "i386/int.h"
+#include "ke.h"
+#include "i386/arch.h"
 
 int cmd_echo(int argc, char** argv)
 {

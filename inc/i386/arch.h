@@ -1,5 +1,5 @@
-#ifndef INT_H
-#define INT_H
+#ifndef ARCH_H
+#define ARCH_H
 
 #include <stdint.h>
 
@@ -35,18 +35,36 @@ typedef struct irqctx {
 typedef void (*irq_handler)(irqctx_t);
 
 void idt_setentry(uint8_t vector, void* isr, uint16_t cs, uint8_t flags);
-
 void idt_setirqhandler(uint8_t line, irq_handler handler, uint8_t enable);
-
 void idt_init(void);
-
 void irq_sendeoi(uint8_t irq);
-
 void irq_remap(void);
-
 void irq_setmask(uint8_t IRQline);
- 
 void irq_clearmask(uint8_t IRQline);
-
 void irq_clear(void);
+
+static inline void outb(uint16_t port, uint8_t val)
+{
+    __asm__ volatile ( "outb %b0, %w1" :: "a"(val), "Nd"(port) : "memory");
+}
+
+static inline uint8_t inb(uint16_t port)
+{
+    uint8_t ret;
+    __asm__ volatile ( "inb %w1, %b0"
+                   : "=a"(ret)
+                   : "Nd"(port)
+                   : "memory"); 
+    return ret;
+}
+
+static inline uint8_t halt()
+{
+    __asm__ volatile ("hlt");
+}
+
+static inline void io_wait(void)
+{
+    outb(0x80, 0);
+}
 #endif
