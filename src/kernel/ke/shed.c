@@ -1,5 +1,6 @@
 #include <stdint.h>
-#include <stdio.h>
+
+#define NULL ((void*)0)
 
 typedef struct
 {
@@ -35,7 +36,7 @@ context shedctx;
 
 void switch_context(context* a, context* b)
 {
-    printf("%i -> %i\n", a->ip, b->ip);
+    
 }
 
 proc* alloc_proc()
@@ -102,16 +103,4 @@ void yield()
 {
     curproc->state = PS_RUNNABLE;
     switch_context(&curproc->ctx, &shedctx);
-}
-
-int main(int argc, char *argv[])
-{
-    for(int i = 0; i < NPROX; i++)
-    {
-        prox[i].ctx.ip = i;
-    }
-    shedctx.ip = 9999;
-    add_proc(127, PM_SYS);
-    add_proc(10, PM_USR);
-    shedule();
 }

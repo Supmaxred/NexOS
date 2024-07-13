@@ -2,7 +2,7 @@
 
 #include "video.h"
 #include "serialport.h"
-#include "i386/arch.h"
+#include "x86.h"
 #include "kshell.h"
 #include "pckbd.h"
 #include "ke.h"
@@ -22,7 +22,7 @@ void sleep(uint32_t ms)
     uint32_t tartime = curtime + ms;
 
     while(ke_clock < tartime)
-        halt();
+        hlt();
 }
 
 void kernel_main(uint32_t ds, uint32_t cs, multiboot_info_t* _multiboot)
@@ -30,8 +30,8 @@ void kernel_main(uint32_t ds, uint32_t cs, multiboot_info_t* _multiboot)
     multiboot = _multiboot;
     kernelcs = cs;
     kernelds = ds;
-    dbg_printf("cs:%x\n", cs);
-    dbg_printf("ds:%x\n\n", ds);
+    sp_printf("cs:%x\n", cs);
+    sp_printf("ds:%x\n\n", ds);
 
     idt_init();
     init_serial();

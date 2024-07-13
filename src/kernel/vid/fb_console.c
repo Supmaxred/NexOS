@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 
 #include "video.h"
 
@@ -24,13 +25,25 @@ extern uint32_t fb_height;
 
 static void _fb_scroll()
 {
-    for (uint16_t y = 0; y < fb_height; y++)
-    {
-        for (uint16_t x = 0; x < fb_width; x++)
-        {
-            fb_setpixel(x, y, fb_getpixel(x, y + 14));
-        }
-    }
+    uint32_t row_size = fb_width * sizeof(uint32_t);
+
+    uint32_t* src = fb_pixeladdr(0, 14);
+    uint32_t* dest = fb_pixeladdr(0, 0);
+
+    uint32_t copy_lines = fb_height - 14;
+
+    memmove(dest, src, copy_lines * row_size);
+
+    uint32_t* clear_start = fb_pixeladdr(0, fb_height - 14);
+    memset(clear_start, 0, 14 * row_size);
+
+    //for (uint16_t y = 0; y < fb_height; y++)
+    //{
+    //    for (uint16_t x = 0; x < fb_width; x++)
+    //    {
+    //        fb_setpixel(x, y, fb_getpixel(x, y + 14));
+    //    }
+    //}
 }
 
 static void _fb_linefeed()
@@ -98,6 +111,14 @@ void fb_setcursor(uint8_t vis)
 
     curenable = vis;
     _fb_updatecur();
+}
+
+void fb_togglecursor()
+{
+    if (curenable)
+    {
+        TOGGLECUR();
+    }
 }
 
 void fb_putc(char c)

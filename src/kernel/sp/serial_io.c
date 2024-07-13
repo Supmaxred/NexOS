@@ -1,7 +1,7 @@
 #include <stdarg.h>
 
 #include "serialport.h"
-#include "i386/arch.h"
+#include "x86.h"
 
 #define PORT 0x3f8          // COM1
 

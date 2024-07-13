@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include "i386/arch.h"
+#include "x86.h"
 #include "serialport.h"
 #include "ke.h"
 
@@ -23,13 +23,13 @@ const char* exception_names[] = {
     "Overflow",                 //4
     "BoundRangeExceed",         //5
     "InvalidOpcode",            //6
-    "DeviceNotAviable",         //7
+    "CoprocessorNotAviable",    //7
     "DoubleFault",              //8
     "CoprocessorSegmentOverrun",//9
     "InvalidTSS",               //10
     "SegmentNotPresent",        //11
-    "StackSegmentFault",        //12
-    "GeneralProtectionFault",   //13
+    "StackFault",               //12
+    "GeneralProtection",        //13
     "PageFault",                //14
     "",                         //15
     "x87",                      //16
@@ -52,7 +52,7 @@ const char* exception_names[] = {
 
 void idt_setentry(uint8_t vector, void* isr, uint16_t cs, uint8_t flags)
 {
-    idt_table[vector].isr_low = (uint16_t)((uintptr_t)isr & 0xFFFF);
+    idt_table[vector].isr_low = (uint16_t)((uintptr_t)isr);
     idt_table[vector].isr_high = (uint16_t)((uintptr_t)isr >> 16);
     idt_table[vector].gdt_cs = cs;
     idt_table[vector].reserved = 0;
@@ -87,8 +87,8 @@ void idt_init() {
         idt_setentry(i + 0x20, irq_table[i], kernelcs, 0x8E);
     }
 
-    __asm__ volatile ("lidt %0" : : "m"(idtr));
-    __asm__ volatile ("sti");
+    lidt(&idtr);
+    sti();
 }
 
 void handle_exception(isrctx_t ctx)
@@ -97,13 +97,16 @@ void handle_exception(isrctx_t ctx)
     if(ctx.errcode)
         printf(", Error Code:%x", ctx.errcode >> 3);
     printf(".\n");
-    __asm__ volatile ("cli; hlt");
+
+    cli();
+    while(1)
+        hlt();
 }
 
 void handle_irqint(irqctx_t ctx)
 {
     if(irq_handlertable[ctx.irq])
-        irq_handlertable[ctx.irq](ctx);
+        irq_handlertable[ctx.irq](&ctx);
 
     irq_sendeoi(ctx.irq);
 }

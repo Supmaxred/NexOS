@@ -28,6 +28,7 @@ CMDDEF(reboot);
 CMDDEF(sleep);
 CMDDEF(uptime);
 CMDDEF(date);
+CMDDEF(test);
 
 cmd_t cmds[] = {
     CMD_ENTRY(echo),
@@ -37,6 +38,7 @@ cmd_t cmds[] = {
     CMD_ENTRY(sleep),
     CMD_ENTRY(uptime),
     CMD_ENTRY(date),
+    CMD_ENTRY(test),
 };
 
 void kshell_drawlogo()
@@ -139,7 +141,7 @@ void kshell_procceschar(char ch)
 	if(ch == '\n') 
     {
         cmd_buffer[cmd_bufferlen++] = 0;
-        putc('\n');
+        putch('\n');
 		kshell_execute();
         cmd_bufferlen = 0;
         //pckbd_flush();
@@ -154,7 +156,7 @@ void kshell_procceschar(char ch)
         return;
 
     cmd_buffer[cmd_bufferlen++] = ch;
-    putc(ch);
+    putch(ch);
 }
 
 void kshell_main()

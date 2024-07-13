@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "i386/arch.h"
+#include "x86.h"
 #include <time.h>
 
 #define CMOS_ADDRESS 0x70

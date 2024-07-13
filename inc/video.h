@@ -80,5 +80,5 @@ void fb_drawchar(
 
 //fb_stdio.c
 void fb_setcursor(uint8_t vis);
-
+void fb_togglecursor();
 void fb_putc(char c);

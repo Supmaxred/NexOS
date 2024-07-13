@@ -3,7 +3,7 @@
 
 #include "serialport.h"
 
-void dbg_putc(char c)
+void sp_putc(char c)
 {
     write_serial(c);
 
@@ -11,13 +11,13 @@ void dbg_putc(char c)
         write_serial('\r');
 }
 
-void dbg_puts(const char* str)
+void sp_puts(const char* str)
 {  
     while(*str != '\0')
-        dbg_putc(*str++);
+        sp_putc(*str++);
 }
 
-void dbg_printf(const char* format, ...)
+void sp_printf(const char* format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -36,7 +36,7 @@ void dbg_printf(const char* format, ...)
                 int value = va_arg(args, int);
                 char buf[11];
                 itos(value, buf);
-                dbg_puts(buf);
+                sp_puts(buf);
             }   break;
 
             case 'x':
@@ -44,24 +44,24 @@ void dbg_printf(const char* format, ...)
                 unsigned int value = va_arg(args, unsigned int);
                 char buf[9];
                 itox(value, buf);
-                dbg_puts(buf);
+                sp_puts(buf);
             }   break;
 
             case 'c':
             {
                 char value = va_arg(args, int);
-                dbg_putc(value);
+                sp_putc(value);
             }   break;
             
             case 's':
             {
                 const char* value = va_arg(args, char*);
-                dbg_puts(value);
+                sp_puts(value);
             }   break;
 
             case '%':
             {
-                dbg_putc('%');
+                sp_putc('%');
             }   break;
 
             default:
@@ -70,7 +70,7 @@ void dbg_printf(const char* format, ...)
         }
         else
         {
-            dbg_putc(*format);
+            sp_putc(*format);
         }
 
         format++;

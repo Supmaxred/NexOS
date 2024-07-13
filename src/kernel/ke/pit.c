@@ -1,6 +1,7 @@
-#include "i386/arch.h"
+#include "x86.h"
 #include "ke.h"
 #include "serialport.h"
+#include "video.h"
 
 #define PITPORT_CH0 0x40
 #define PITPORT_CH1 0x41
@@ -30,22 +31,23 @@
 #define PITCMD_BINARYMODE  (0)
 #define PITCMD_BCDMODE     (1)
 
-#define PIT_BASEFREQUENCY 1193180
+#define PIT_BASEFREQUENCY 1193182
 
 uint32_t pit_delayms = 1;
 uint32_t pit_freq = 1;
 
 static uint32_t counter = 0;
 
-void pit_irqhandler(irqctx_t ctx)
+void pit_irqhandler(irqctx_t* ctx)
 {
     ke_ticks++;
     ke_clock += pit_delayms;
 
     if(++counter >= pit_freq)
     {
-        counter -= pit_freq;
+        counter = 0;
         ke_systime++;
+        fb_togglecursor();
     }
 }
 

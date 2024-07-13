@@ -17,12 +17,12 @@ void fb_init()
     fb_height = multiboot->framebuffer_height;
     fb_bpp = multiboot->framebuffer_bpp;
 
-    dbg_printf("fb_addr - %x\n", fb_addr);
-    dbg_printf("fb_pitch - %i\n", fb_pitch);
-    dbg_printf("fb_width - %i\n", fb_width);
-    dbg_printf("fb_height - %i\n", fb_height);
-    dbg_printf("fb_bpp - %i\n", fb_bpp);
-    dbg_printf("fb_type - %i\n\n", multiboot->framebuffer_type);
+    sp_printf("fb_addr - %x\n", fb_addr);
+    sp_printf("fb_pitch - %i\n", fb_pitch);
+    sp_printf("fb_width - %i\n", fb_width);
+    sp_printf("fb_height - %i\n", fb_height);
+    sp_printf("fb_bpp - %i\n", fb_bpp);
+    sp_printf("fb_type - %i\n\n", multiboot->framebuffer_type);
 }
 
 void fb_drawrect(const rect_t* rect, color_t col)

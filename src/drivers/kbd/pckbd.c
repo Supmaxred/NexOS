@@ -1,4 +1,4 @@
-#include "i386/arch.h"
+#include "x86.h"
 #include <stdint.h>
 #include <ctype.h>
 #include "kbd_keymap.h"
@@ -43,7 +43,7 @@ void pckbd_putch(char c)
     buf.end = buf.end % BUFSIZE;
 }
 
-void pckbd_irqhandler(irqctx_t ctx)
+void pckbd_irqhandler(irqctx_t* ctx)
 {
     if(is_disabled)
         return;

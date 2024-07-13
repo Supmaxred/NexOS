@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "ke.h"
-#include "i386/arch.h"
+#include "x86.h"
 
 int cmd_echo(int argc, char** argv)
 {
@@ -140,4 +140,24 @@ int cmd_date(int argc, char** argv)
     time_t curtim = time(NULL);
     struct tm* curdat = localtime(&curtim);
     printf("%s", asctime(curdat));
+}
+
+int cmd_test(int argc, char** argv)
+{
+    int val = stoi(argv[1]);
+    int arg = stoi(argv[2]);
+
+    switch(val)
+    {
+        case 0:
+        {
+            for (uint32_t i = 0; i < arg; i++)
+            {
+                putch('\n');
+            }
+            
+        }   break;
+    }
+
+    return 0;
 }

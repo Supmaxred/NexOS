@@ -3,7 +3,7 @@
 
 #include "video.h"
 
-void putc(char c)
+void putch(char c)
 {
     fb_putc(c);
 }

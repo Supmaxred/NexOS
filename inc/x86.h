@@ -32,7 +32,7 @@ typedef struct irqctx {
     uint32_t eip, cs, eflags, useresp, ss;          //Pushed by CPU
 } irqctx_t;
 
-typedef void (*irq_handler)(irqctx_t);
+typedef void (*irq_handler)(irqctx_t*);
 
 void idt_setentry(uint8_t vector, void* isr, uint16_t cs, uint8_t flags);
 void idt_setirqhandler(uint8_t line, irq_handler handler, uint8_t enable);
@@ -51,20 +51,44 @@ static inline void outb(uint16_t port, uint8_t val)
 static inline uint8_t inb(uint16_t port)
 {
     uint8_t ret;
-    __asm__ volatile ( "inb %w1, %b0"
-                   : "=a"(ret)
-                   : "Nd"(port)
-                   : "memory"); 
+    __asm__ volatile ( "inb %w1, %b0" : "=a"(ret) : "Nd"(port) : "memory"); 
     return ret;
 }
 
-static inline uint8_t halt()
+static inline void outw(uint16_t port, uint16_t val)
+{
+    __asm__ volatile ("outw %0, %1" :: "a"(val), "Nd"(port));
+}
+
+static inline uint16_t inw(uint16_t port)
+{
+    uint16_t ret;
+    __asm__ volatile ("inw %1, %0" : "=a"(ret) : "Nd"(port));
+    return ret;
+}
+
+static inline void lidt(idtr_t* idtr)
+{
+    __asm__ volatile ("lidt %0" :: "m"(*idtr));
+}
+
+static inline void cli()
+{
+    __asm__ volatile ("cli");
+}
+
+static inline void sti()
+{
+    __asm__ volatile ("sti");
+}
+
+static inline void hlt()
 {
     __asm__ volatile ("hlt");
 }
 
 static inline void io_wait(void)
 {
-    outb(0x80, 0);
+    __asm__ volatile ( "outb %%al, $0x80" : : "a"(0) );
 }
 #endif
