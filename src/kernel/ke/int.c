@@ -55,7 +55,7 @@ void idt_setentry(uint8_t vector, void* isr, uint16_t cs, uint8_t flags)
     idt_table[vector].isr_low = (uint16_t)((uintptr_t)isr);
     idt_table[vector].isr_high = (uint16_t)((uintptr_t)isr >> 16);
     idt_table[vector].gdt_cs = cs;
-    idt_table[vector].reserved = 0;
+    idt_table[vector].res = 0;
     idt_table[vector].flags = flags;
 }
 
@@ -71,20 +71,20 @@ void idt_setirqhandler(uint8_t line, irq_handler handler, uint8_t enable)
 }
 
 void idt_init() {
-    idtr.base = (uintptr_t)&idt_table;
+    idtr.offset = (uintptr_t)&idt_table;
     idtr.limit = sizeof(idt_table) - 1;
 
     memset(&idt_table, 0, sizeof(idt_table));
 
     for (uint8_t vector = 0; vector < 32; vector++) {
-        idt_setentry(vector, isr_table[vector], kernelcs, 0x8E);
+        idt_setentry(vector, isr_table[vector], 0x08, 0x8E);
     }
 
     irq_remap();
     irq_clear();
 
     for (uint8_t i = 0; i < 16; i++) {
-        idt_setentry(i + 0x20, irq_table[i], kernelcs, 0x8E);
+        idt_setentry(i + 0x20, irq_table[i], 0x08, 0x8E);
     }
 
     lidt(&idtr);

@@ -33,6 +33,9 @@ void kernel_main(uint32_t ds, uint32_t cs, multiboot_info_t* _multiboot)
     sp_printf("cs:%x\n", cs);
     sp_printf("ds:%x\n\n", ds);
 
+    seg_init();
+    kernelcs = 0x08;
+    kernelds = 0x10;
     idt_init();
     init_serial();
     fb_init();
@@ -40,6 +43,5 @@ void kernel_main(uint32_t ds, uint32_t cs, multiboot_info_t* _multiboot)
     pit_init(50);
 
     ke_systime = rtc_update();
-
     kshell_main();
 }

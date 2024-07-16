@@ -5,13 +5,13 @@
 #include "pckbd.h"
 #include "video.h"
 
-#define CMD_MAXLEN 50
+#define CMD_MAXLEN 20000
 
 #define CMDDEF(name) int cmd_##name(int argc, char** argv)
 #define CMD_ENTRY(name) {#name, cmd_##name}
 
-char cmd_buffer[51];
-char cmd_bufferlen = 0;
+char cmd_buffer[CMD_MAXLEN + 1]; //Max command length + null terminator
+uint16_t cmd_bufferlen = 0;
 
 typedef int (*cmdf_t)(int, char**);
 
@@ -69,9 +69,8 @@ void kshell_parsecmd(char** _argv, char* _argc)
             argc++;
 
             while (*ptr != '"' && *ptr != 0)
-            {
                 ptr++;
-            }
+            
             if (*ptr == '"')
             {
                 *ptr = '\0';
@@ -100,7 +99,7 @@ void kshell_parsecmd(char** _argv, char* _argc)
 
 void kshell_execute()
 {
-    char *argv[26];
+    char *argv[CMD_MAXLEN / 2 + 1];
     char argc = 0;
 
     kshell_parsecmd(argv, &argc);
@@ -149,14 +148,17 @@ void kshell_procceschar(char ch)
 		return;
 	}
 
-    if(cmd_bufferlen >= 50)
+    if(cmd_bufferlen >= CMD_MAXLEN)
         return;
 
     if(ch < ' ' || ch > '~')
         return;
 
-    cmd_buffer[cmd_bufferlen++] = ch;
-    putch(ch);
+    //for (int i = 0; i < 10; i++)
+    {
+        cmd_buffer[cmd_bufferlen++] = ch;
+        putch(ch);
+    }
 }
 
 void kshell_main()

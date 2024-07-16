@@ -35,21 +35,20 @@
 00000000000i[      ]   USB support: UHCI OHCI EHCI xHCI
 00000000000i[      ]   VGA extension support: vbe cirrus voodoo
 00000000000i[IMG   ] Disk image modules
-00000000000i[IMG   ]   flat concat sparse dll growing undoable volatile vbox
-00000000000i[IMG   ]   vmware4 vvfat vmware3 vpc
+00000000000i[IMG   ]   flat concat sparse dll growing undoable volatile vpc vbox
+00000000000i[IMG   ]   vmware3 vmware4 vvfat
 00000000000i[NETCTL] Networking modules
-00000000000i[NETCTL]   null socket slirp linux vde tuntap vnet
+00000000000i[NETCTL]   null slirp linux tuntap vnet vde socket
 00000000000i[SNDCTL] Sound drivers
-00000000000i[SNDCTL]   dummy oss sdl file alsa
+00000000000i[SNDCTL]   dummy oss file sdl alsa
 00000000000i[USBCTL] Pluggable USB devices
-00000000000i[USBCTL]   disk cdrom mouse tablet keypad keyboard floppy hub
-00000000000i[USBCTL]   printer
-00000000000i[MEM0  ] allocated memory at 0x7fc99de6f010. after alignment, vector=0x7fc99de70000
+00000000000i[USBCTL]   floppy printer hub mouse tablet keypad keyboard disk
+00000000000i[USBCTL]   cdrom
+00000000000i[MEM0  ] allocated memory at 0x7f5333021010. after alignment, vector=0x7f5333022000
 00000000000i[MEM0  ] 32.00MB
 00000000000i[MEM0  ] mem block size = 0x00020000, blocks=256
 00000000000i[MEM0  ] rom at 0xffff0000/65536 ('/usr/share/bochs/BIOS-bochs-legacy')
 00000000000i[CPU0  ] WARNING: 3DNow! is not implemented yet !
 00000000000i[DEV   ] will paste characters every 100 iodev timer ticks
-00000000000i[      ] lt_dlhandle is 0x564a3074dd70
+00000000000i[      ] lt_dlhandle is 0x55c0fd8f1a70
 00000000000i[PLUGIN] loaded plugin libbx_soundalsa.so
-00000000000i[      ] lt_dlhandle is 0x564a30760ed0

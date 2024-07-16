@@ -43,7 +43,7 @@ irq_master:
     mov ax, ds
     push eax                 ; Push data segment
 
-    mov ax, [kernelds]  ; Load the kernel data segment descriptor
+    mov ax, 0x10  ; Load the kernel data segment descriptor
     mov ds, ax
     mov es, ax
     mov fs, ax
@@ -68,7 +68,7 @@ isr_master:
     mov ax, ds
     push eax                 ; Push data segment
 
-    mov ax, [kernelds]  ; Load the kernel data segment descriptor
+    mov ax, 0x10  ; Load the kernel data segment descriptor
     mov ds, ax
     mov es, ax
     mov fs, ax

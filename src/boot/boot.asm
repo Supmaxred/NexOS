@@ -69,6 +69,11 @@ start:
     hlt
     jmp halt
 
+global agugu
+agugu:
+  jmp 0x08:flush_cs
+  flush_cs:
+
   ;Stack
   section .bss
   stack_bottom:
