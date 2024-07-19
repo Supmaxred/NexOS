@@ -12,16 +12,16 @@
 #define NUMSEGS 5
 
 typedef struct {
-	uint16_t    isr_low;		// The lower 16 bits of the ISR's address
-	uint16_t    gdt_cs;			// The GDT segment selector that the CPU will load into CS before calling the ISR
-	uint8_t     res;		// Set to zero
-	uint8_t     flags;			// Type and attributes; see the IDT page
-	uint16_t    isr_high;		// The higher 16 bits of the ISR's address
+    uint16_t isr_low;           // The lower 16 bits of the ISR's address
+    uint16_t gdt_cs;            // The GDT segment selector that the CPU will load into CS before calling the ISR
+    uint8_t res;                //Reserved
+    uint8_t flags;              // Type and attributes; see the IDT page
+    uint16_t isr_high;          // The higher 16 bits of the ISR's address
 } __attribute__((packed)) idt_entry_t;
 
 typedef struct {
-	uint16_t	limit;
-	uint32_t	offset;
+	uint16_t limit;
+	uint32_t offset;
 } __attribute__((packed)) idtr_t;
 
 typedef struct {
@@ -58,8 +58,8 @@ typedef struct {
 } gdt_entry_t;
 
 typedef struct {
-	uint16_t	limit;
-	uint32_t	offset;
+    uint16_t limit;
+    uint32_t offset;
 } __attribute__((packed)) gdtr_t;
 
 typedef struct isrctx {
@@ -78,19 +78,22 @@ typedef struct irqctx {
 
 typedef void (*irq_handler)(irqctx_t*);
 
+//int.c
 void idt_setentry(uint8_t vector, void* isr, uint16_t cs, uint8_t flags);
 void idt_setirqhandler(uint8_t line, irq_handler handler, uint8_t enable);
 void idt_init(void);
-
-void irq_sendeoi(uint8_t irq);
+//irq.c
+void irq_sendeoi(uint8_t irqline);
 void irq_remap(void);
-void irq_setmask(uint8_t IRQline);
-void irq_clearmask(uint8_t IRQline);
+void irq_setmask(uint8_t irqline);
+void irq_clearmask(uint8_t irqline);
 void irq_clear(void);
-
+//seg.c
 void seg_init(void);
+//gdt_flush.asm
+void gdt_flush(gdtr_t* gtdr);
 
-static inline void setgdtgate(gdt_entry_t* entry, uint32_t offset, uint32_t limit, uint8_t dpl, uint8_t istss, uint8_t iscs)
+static inline void gdt_setgate(gdt_entry_t* entry, uint32_t offset, uint32_t limit, uint8_t dpl, uint8_t iscsords, uint8_t iscs)
 {
     entry->offset_low = offset & 0xFFFF;
     entry->offset_middle = (offset >> 16) & 0xFF;
@@ -100,7 +103,7 @@ static inline void setgdtgate(gdt_entry_t* entry, uint32_t offset, uint32_t limi
     entry->a = 0;
     entry->p = 1;
     entry->dpl = dpl;
-    entry->s = !istss;
+    entry->s = !iscsords;
     entry->e = iscs;
     entry->db = 1;
     entry->rw = 1;

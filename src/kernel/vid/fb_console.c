@@ -36,7 +36,7 @@ static void _fb_scroll()
 
     uint32_t copy_lines = fb_height - 14;
 
-    is_scrolling = 1
+    is_scrolling = 1;
     memmove(dest, src, copy_lines * row_size);
 
     uint32_t* clear_start = fb_pixeladdr(0, fb_height - 14);

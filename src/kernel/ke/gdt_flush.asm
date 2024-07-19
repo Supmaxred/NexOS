@@ -1,5 +1,6 @@
 global gdt_flush
 
+; void gdt_flush(gtdr_t* gtdr)
 gdt_flush:
     mov eax, [esp + 4]
     lgdt [eax]
