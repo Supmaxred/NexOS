@@ -22,6 +22,10 @@ void sleep(uint32_t ms)
         hlt();
 }
 
+int testbit(int num, int bit) {
+    return (num & (1 << bit)) != 0;
+}
+
 void kernel_main(multiboot_info_t* _multiboot)
 {
     multiboot = _multiboot;
@@ -31,13 +35,18 @@ void kernel_main(multiboot_info_t* _multiboot)
     init_serial();
     fb_init();
     pckbd_init();
-    //pit_init();
-    //pit_setfreq(35);
+    pit_init();
+    pit_setfreq(35);
 
     ke_systime = rtc_update();
-    pg_init();
-    sp_printf("Now in paging!:)\n");
-    printf("Hi");
-    sp_printf("Now im praying!:(\n");
+
+    if(testbit(multiboot->flags, 0))
+    {
+        printf("mem_lower = %x, mem_upper = %x", multiboot->mem_lower * 1024, multiboot->mem_upper * 1024);
+    }
+    //pg_init();
+    //sp_printf("Now in paging!:)\n");
+    //printf("Hi");
+    //sp_printf("Now im praying!:(\n");
     //kshell_main();
 }
