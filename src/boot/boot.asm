@@ -54,25 +54,14 @@ start:
 
   push ebx
 
-  mov ebx, cs
-  push ebx
-
-  mov ebx, ds
-  push ebx
-
   call kernel_main
 
-  add esp, 4 * 3
+  add esp, 4
 
-  ;cli
+  cli
   halt:
     hlt
     jmp halt
-
-global agugu
-agugu:
-  jmp 0x08:flush_cs
-  flush_cs:
 
   ;Stack
   section .bss

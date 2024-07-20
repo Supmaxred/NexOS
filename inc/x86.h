@@ -147,6 +147,23 @@ static inline void lgdt(gdtr_t* gdtr)
     __asm__ volatile ("lgdt %0" :: "m"(*gdtr));
 }
 
+static inline uint32_t gcr0()
+{
+    uint32_t ret;
+    __asm__ volatile("mov %%cr0, %0" : "=r"(ret));
+    return ret;
+}
+
+static inline void lcr0(uint32_t cr0)
+{
+    __asm__ volatile("mov %0, %%cr0" : : "r"(cr0));
+}
+
+static inline void lcr3(uint32_t* pagedir)
+{
+    __asm__ volatile("mov %0, %%cr3" : : "r"(pagedir));
+}
+
 static inline void cli()
 {
     __asm__ volatile ("cli");

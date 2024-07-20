@@ -93,10 +93,10 @@ void idt_init() {
 
 void handle_exception(isrctx_t ctx)
 {
-    printf("\nAn exception occurred!\nISR:%i, Name:%s", ctx.intnum, exception_names[ctx.intnum]);
+    sp_printf("\nAn exception occurred!\nISR:%i, Name:%s", ctx.intnum, exception_names[ctx.intnum]);
     if(ctx.errcode)
-        printf(", Error Code:%x", ctx.errcode >> 3);
-    printf(".\n");
+        sp_printf(", Error Code:%x", ctx.errcode >> 3);
+    sp_printf(".\n");
 
     cli();
     while(1)

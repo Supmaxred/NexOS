@@ -1,6 +1,5 @@
 extern handle_irqint
 extern handle_exception
-extern kernelds
 
 global isr_table
 global irq_table

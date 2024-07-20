@@ -51,13 +51,9 @@ void pit_irqhandler(irqctx_t* ctx)
     }
 }
 
-void pit_init(uint32_t hz)
+void pit_setfreq(uint32_t hz)
 {
-    counter = 0;
-
-    idt_setirqhandler(0, pit_irqhandler, 1);
-
-    uint16_t divisor = PIT_BASEFREQUENCY / hz;
+    uint16_t divisor = (PIT_BASEFREQUENCY * 100) / (hz * 100);
 
     outb(PITPORT_CMD, PITCMD_BINARYMODE | PITCMD_MODE3 | (PITCMD_LOBYTE | PITCMD_HIBYTE));
 
@@ -66,4 +62,11 @@ void pit_init(uint32_t hz)
 
     pit_freq = hz;
     pit_delayms = 1000 / hz;
+}
+
+void pit_init()
+{
+    counter = 0;
+
+    idt_setirqhandler(0, pit_irqhandler, 1);
 }
