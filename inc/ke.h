@@ -16,7 +16,7 @@ void pit_init(void);
 //cmos.c
 time_t rtc_update();
 
-extern multiboot_info_t* multiboot;
+extern multiboot_info_t* mb;
 extern uint32_t ke_ticks;
 extern uint32_t ke_clock;
 extern uint32_t ke_systime;

@@ -7,7 +7,7 @@
 #include "pckbd.h"
 #include "ke.h"
 
-multiboot_info_t* multiboot;
+multiboot_info_t* mb;
 
 uint32_t ke_ticks = 0;
 uint32_t ke_clock = 0;
@@ -28,7 +28,7 @@ int testbit(int num, int bit) {
 
 void kernel_main(multiboot_info_t* _multiboot)
 {
-    multiboot = _multiboot;
+    mb = _multiboot;
 
     seg_init();
     idt_init();
@@ -40,9 +40,19 @@ void kernel_main(multiboot_info_t* _multiboot)
 
     ke_systime = rtc_update();
 
-    if(testbit(multiboot->flags, 0))
+    if(testbit(mb->flags, 0))
     {
-        printf("mem_lower = %x, mem_upper = %x", multiboot->mem_lower * 1024, multiboot->mem_upper * 1024);
+        printf("mem_lower = %x, mem_upper = %x\n", mb->mem_lower * 1024, mb->mem_upper * 1024);
+    }
+
+    if(testbit(mb->flags, 6))
+    {
+        for (size_t i = 0; i < mb->mmap_length; i += sizeof(struct multiboot_mmap_entry))
+        {
+           struct multiboot_mmap_entry *me = (struct multiboot_mmap_entry*)(mb->mmap_addr + i);
+           printf("addr = %x, len = %x, size = %x, type = %i\n",
+           me->addr, me->len, me->size, me->type);
+        }
     }
     //pg_init();
     //sp_printf("Now in paging!:)\n");

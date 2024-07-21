@@ -16,7 +16,7 @@ void mm_init()
         pagetable[i] = (i << 12) | 3;
     }
 
-    uint32_t fbaddr = (multiboot->framebuffer_addr >> 12) & 0xfff;
+    uint32_t fbaddr = (mb->framebuffer_addr >> 12) & 0xfff;
     for (int i = 0; i < PAGE_ENTRIES; i++)
     {
         pagetablefb[i] = ((i + fbaddr) << 12) | 3;
@@ -28,7 +28,7 @@ void mm_init()
     }
 
     pagedir[0] = ((uint32_t)pagetable) | 3;
-    pagedir[multiboot->framebuffer_addr >> 22] = ((uint32_t)pagetablefb) | 3;
+    pagedir[mb->framebuffer_addr >> 22] = ((uint32_t)pagetablefb) | 3;
 
     lcr3(&pagedir);
     lcr0(gcr0() | 0x80000000);
