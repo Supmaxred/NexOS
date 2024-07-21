@@ -2,8 +2,16 @@
 #include "x86.h"
 #include "ke.h"
 
-#define PAGE_SIZE 4096
+#define PAGE_SIZE 0x1000
 #define PAGE_ENTRIES 1024
+
+#define PTSIZE 1024 * 3
+#define BSIZE sizeof(uint32_t)
+
+#define test_bit(val, bit) ((val & bit) != 0)
+#define set_bit(val, bit) val |= bit
+#define next_bit(bit) bit <<= 1;
+#define calc_pageaddr(bitmapi, bit) (((bitmapi << 3) * BSIZE + bit) << 12)
 
 uint32_t pagedir[PAGE_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
 uint32_t pagetable[PAGE_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
@@ -34,49 +42,30 @@ void mm_init()
     lcr0(gcr0() | 0x80000000);
 }
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-#define PTSIZE 1024 * 3
-#define PGSIZE 0x1000
-#define BSIZE sizeof(uint32_t)
-
 
 uint32_t* pagebm;
 void* pagedata;
 
-void pageinit(uint32_t* meta, void* data)
-{
-    pagebm = meta;
-    pagedata = data;
-}    
-
-uint32_t firstfree = 0;
-
 void* palloc()
 {
-    uint32_t j = firstfree % (8 * BSIZE);
-    for(uint32_t i = firstfree / (8 * BSIZE); i < PTSIZE / BSIZE; i++)
+    uint32_t j = 0;
+    for(uint32_t i = 0; i < PTSIZE / BSIZE; i++)
     {
         uint32_t* bitmap = &pagebm[i];
         
         if(*bitmap == 0xffffFFFF)
-            goto end;
+            continue;
         
-        uint32_t cursor = 1;
-        for( ; j < 8 * BSIZE; j++)
+        uint32_t bit = 1;
+        for( j = 0; j < 8 * BSIZE; j++)
         {
-            if(!(*bitmap & cursor))
+            if(!test_bit(*bitmap, bit))
             {
-                printf("finded!");
-                *bitmap |= cursor;
-                return (uintptr_t)pagedata + (i * 8 * BSIZE + j) * PGSIZE;
+                set_bit(*bitmap, bit);
+                return (uintptr_t)pagedata + calc_pageaddr(i, j);
             }
-            cursor <<= 1;
+            next_bit(bit);
         }
-        end:
-        j = 0;
     }
     return NULL;
 }
