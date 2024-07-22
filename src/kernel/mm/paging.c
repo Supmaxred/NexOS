@@ -8,10 +8,6 @@
 #define PTSIZE 1024 * 3
 #define BSIZE sizeof(uint32_t)
 
-#define test_bit(val, bit) ((val & bit) != 0)
-#define set_bit(val, bit) val |= bit
-#define next_bit(bit) bit <<= 1;
-#define calc_pageaddr(bitmapi, bit) (((bitmapi << 3) * BSIZE + bit) << 12)
 
 uint32_t pagedir[PAGE_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
 uint32_t pagetable[PAGE_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
@@ -40,32 +36,4 @@ void mm_init()
 
     lcr3(&pagedir);
     lcr0(gcr0() | 0x80000000);
-}
-
-
-uint32_t* pagebm;
-void* pagedata;
-
-void* palloc()
-{
-    uint32_t j = 0;
-    for(uint32_t i = 0; i < PTSIZE / BSIZE; i++)
-    {
-        uint32_t* bitmap = &pagebm[i];
-        
-        if(*bitmap == 0xffffFFFF)
-            continue;
-        
-        uint32_t bit = 1;
-        for( j = 0; j < 8 * BSIZE; j++)
-        {
-            if(!test_bit(*bitmap, bit))
-            {
-                set_bit(*bitmap, bit);
-                return (uintptr_t)pagedata + calc_pageaddr(i, j);
-            }
-            next_bit(bit);
-        }
-    }
-    return NULL;
 }

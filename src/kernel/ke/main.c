@@ -26,6 +26,13 @@ int testbit(int num, int bit) {
     return (num & (1 << bit)) != 0;
 }
 
+int test;
+
+void testfun()
+{
+
+}
+
 void kernel_main(multiboot_info_t* _multiboot)
 {
     mb = _multiboot;
@@ -49,14 +56,11 @@ void kernel_main(multiboot_info_t* _multiboot)
     {
         for (size_t i = 0; i < mb->mmap_length; i += sizeof(struct multiboot_mmap_entry))
         {
-           struct multiboot_mmap_entry *me = (struct multiboot_mmap_entry*)(mb->mmap_addr + i);
-           printf("addr = %x, len = %x, size = %x, type = %i\n",
-           me->addr, me->len, me->size, me->type);
+            struct multiboot_mmap_entry *me = (struct multiboot_mmap_entry*)(mb->mmap_addr + i);
+            printf("addr = %x, len = %x, size = %x, type = %i\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type);
         }
+        printf("test = %x, testfun = %x\n", &test, testfun);
     }
     //pg_init();
-    //sp_printf("Now in paging!:)\n");
-    //printf("Hi");
-    //sp_printf("Now im praying!:(\n");
-    //kshell_main();
+    kshell_main();
 }
