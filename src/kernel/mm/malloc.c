@@ -1,9 +1,19 @@
 #include <stdint.h>
+#include "mm.h"
+#include "ke.h"
 
 #define BLOCK_SIZE 1024 // 1 KB
 #define UINT32BITS (8 * sizeof(uint32_t))
 
+#define PTSIZE 1024 * 3
+#define BSIZE sizeof(uint32_t)
+
 #define calcsize(chunks, bitmaps) ((chunks) * BLOCK_SIZE + (bitmaps) * sizeof(uint32_t))
+
+#define test_bit(val, bit) ((val & bit) != 0)
+#define set_bit(val, bit) val |= bit
+#define next_bit(bit) bit <<= 1;
+#define calc_pageaddr(bitmapi, bit) (((bitmapi << 3) * BSIZE + bit) << 12)
 
 uint32_t* pagebm;
 void* pagedata;
@@ -28,7 +38,7 @@ void calc_chunks_and_bitmaps(uint32_t size, uint32_t* num_chunks, uint32_t* num_
 void* malloc()
 {
     uint32_t j = 0;
-    for(uint32_t i = 0; i < PTSIZE / BSIZE; i++)
+    for(uint32_t i = 0; i < PTSIZE / sizeof(uint32_t); i++)
     {
         uint32_t* bitmap = &pagebm[i];
         
@@ -36,7 +46,7 @@ void* malloc()
             continue;
         
         uint32_t bit = 1;
-        for( j = 0; j < 8 * BSIZE; j++)
+        for( j = 0; j < UINT32BITS; j++)
         {
             if(!test_bit(*bitmap, bit))
             {
