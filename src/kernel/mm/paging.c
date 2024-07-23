@@ -34,6 +34,6 @@ void pg_init()
     pagedir[0] = ((uint32_t)pagetable) | 3;
     pagedir[mb->framebuffer_addr >> 22] = ((uint32_t)pagetablefb) | 3;
 
-    lcr3(&pagedir);
+    lcr3((uint32_t*)&pagedir);
     lcr0(gcr0() | 0x80000000);
 }

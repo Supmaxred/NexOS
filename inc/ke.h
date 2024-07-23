@@ -1,8 +1,9 @@
-#include <multiboot.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <time.h>
+
+#include "multiboot.h"
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))

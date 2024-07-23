@@ -1,4 +1,7 @@
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "ke.h"
 #include "mm.h"
 
@@ -8,32 +11,15 @@
 
 #define BSIZE sizeof(uint32_t)
 
-#define calcsize(chunks, bitmaps) ((chunks) * BLOCK_SIZE + (bitmaps) * sizeof(uint32_t) + sizeof(bitmap_list_t))
+#define calcsize(blocks, bitmaps) ((blocks) * BLOCK_SIZE + (bitmaps) * sizeof(uint32_t) + sizeof(bitmap_list_t))
 
 #define test_bit(val, bit) ((val & bit) != 0)
 #define set_bit(val, bit) val |= bit
 #define next_bit(bit) bit <<= 1;
-#define calc_pageaddr(bitmapi, bit) (((bitmapi << 3) * sizeof(uint32_t) + bit) << 12)
+#define calc_pageaddr(bitmapi, bit) (((bitmapi << 3) * sizeof(uint32_t) + bit) * BLOCK_SIZE)
+#define test_bitn(num, bitn) ((num & (1 << bitn)) != 0)
 
 bitmap_list_t* firstblock = NULL;
-
-void mm_init()
-{
-    if(testbit(mb->flags, 6))
-    {
-        for (size_t i = 0; i < mb->mmap_length; i += sizeof(struct multiboot_mmap_entry))
-        {
-            struct multiboot_mmap_entry *me = (struct multiboot_mmap_entry*)(mb->mmap_addr + i);
-            if(me->type == MULTIBOOT_MEMORY_AVAILABLE)
-                mm_initblock(me);
-        }
-    }
-}
-
-void mm_initblock(struct multiboot_mmap_entry* block)
-{
-
-}
 
 uint32_t align_up(uint32_t address, uint32_t align)
 {
@@ -43,29 +29,29 @@ uint32_t align_up(uint32_t address, uint32_t align)
     return (address + align - 1) & ~(align - 1);
 }
 
-void calc_chunks_and_bitmaps(uint32_t size, uint32_t* num_chunks, uint32_t* num_bitmaps)
+void calc_blocks_and_bitmaps(uint32_t size, uint32_t* num_blocks, uint32_t* num_bitmaps)
 {
-    uint32_t chunks = size / BLOCK_SIZE;
-    uint32_t bitmaps = chunks / UINT32BITS + 1;
+    uint32_t blocks = size / BLOCK_SIZE;
+    uint32_t bitmaps = blocks / UINT32BITS + 1;
 
     while (1)
     {
-        if (calcsize(chunks, bitmaps) <= size)
+        if (calcsize(blocks, bitmaps) <= size)
             break;
 
-        chunks--;
-        bitmaps = chunks / UINT32BITS + 1;
+        blocks--;
+        bitmaps = blocks / UINT32BITS + 1;
     }
 
-    *num_chunks = chunks;
+    *num_blocks = blocks;
     *num_bitmaps = bitmaps;
 }
 
 static void block_setstart(struct multiboot_mmap_entry* block, uint32_t new)
 {
-    uint32_t old = block->addr;
+    int32_t old = new - block->addr;
     block->addr = new;
-    block->len = block->len + (new - old);
+    block->len = (old > 0) ? (block->len - (uint32_t)old) : ((block->len - (uint32_t)(-old)));
 }
 
 static void block_setend(struct multiboot_mmap_entry* block, uint32_t new)
@@ -73,49 +59,65 @@ static void block_setend(struct multiboot_mmap_entry* block, uint32_t new)
     block->len = new - block->addr;
 }
 
+static uint32_t block_getend(struct multiboot_mmap_entry* block)
+{
+    return block->addr + block->len;
+}
+
 void** mm_initmemblock(struct multiboot_mmap_entry* block)
 {
-    if(block->addr < 0x100000)
+    //We dont allow memory under 1MB
+    if(block_getend(block) < 0x100000)
     {
         block->type = MULTIBOOT_MEMORY_RESERVED;
+        printf("Chunk is under 1MB\n");
         return NULL;
     }
-
-    uint32_t blockend = block->addr + block->len;
-
-    char b = block->addr > &kernel_start;
-    char t = blockend < &kernel_end;
-
-    if(b && t || t)
+    else if(block->addr < 0x100000) // and if block end is under 1 mb
     {
-        block_setstart(block, &kernel_end);
+        block_setstart(block, 0x100000);
+    }
+    
+    uint32_t blockend = block_getend(block);
+
+    int b = block->addr < (uint32_t)&kernel_start;
+    int t = blockend > (uint32_t)&kernel_end;
+
+    //Cut conflict between kernel memory and block memmory
+    if((b && t) || t)
+    {
+        block_setstart(block, (uint32_t)&kernel_end);
     }
     else if(b)
     {
-        block_setend(block, &kernel_start);
+        block_setend(block, (uint32_t)&kernel_start);
     }
-
+    //Align memory on page
     uint32_t alignedaddr = align_up(block->addr, PAGE_SIZE);
 
     if(alignedaddr >= block->addr + block->len)
     {
         //🙂
+        printf("Cut so much that no memory there is left\n");
         block->type = MULTIBOOT_MEMORY_RESERVED;
         return NULL;
     }
 
     block_setstart(block, alignedaddr);
 
-    uint32_t chunks = 0;
+    //Clear block with zero
+    memset((void*)block->addr, 0, block->len);
+
+    uint32_t blocks = 0;
     uint32_t bitmaps = 0;
 
-    calc_chunks_and_bitmaps(block->len, &chunks, &bitmaps);
+    calc_blocks_and_bitmaps(block->len, &blocks, &bitmaps);
 
-    bitmap_list_t* entry = block->addr + chunks * BLOCK_SIZE + bitmaps * sizeof(uint32_t);
+    bitmap_list_t* entry = (bitmap_list_t*)((uint32_t)block->addr + blocks * BLOCK_SIZE + bitmaps * sizeof(uint32_t));
     entry->bitmap_count = bitmaps;
-    entry->chunks_count = chunks;
-    entry->first_chunk = block->addr;
-    entry->first_bitmap = block->addr + chunks * BLOCK_SIZE;
+    entry->blocks_count = blocks;
+    entry->first_block = (void*)((uint32_t)block->addr);
+    entry->first_bitmap = (uint32_t*)((uint32_t)block->addr + blocks * BLOCK_SIZE);
     entry->next = NULL;
 
     if(firstblock == NULL)
@@ -142,14 +144,15 @@ void* malloc()
                 if(!test_bit(*bitmap, bit))
                 {
                     set_bit(*bitmap, bit);
-                    return (uintptr_t)pagedata + calc_pageaddr(i, j);
+                    return (void*)((uintptr_t)(curlist->first_block) + calc_pageaddr(i, j));
                 }
                 next_bit(bit);
             }
         }
 
-        if(curlist->next == NULL)
+        if(curlist->next == NULL) {
             return NULL;
+        }
         
         curlist = curlist->next;
     }
@@ -158,7 +161,7 @@ void* malloc()
 
 void mm_init()
 {
-    if(testbit(mb->flags, 6))
+    if(test_bitn(mb->flags, 6))
     {
         void** nextvar = NULL;
         for (size_t i = 0; i < mb->mmap_length; i += sizeof(struct multiboot_mmap_entry))
@@ -168,7 +171,11 @@ void mm_init()
             if(nextvar != NULL)
                 *nextvar = me;
             
-            nextvar = mm_initmemblock(me);
+            if(me->type == MULTIBOOT_MEMORY_AVAILABLE)  
+            {
+                nextvar = mm_initmemblock(me);
+                printf("addr = %x, len = %x, size = %x, type = %i\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type);
+            }
         }
     }
     else
