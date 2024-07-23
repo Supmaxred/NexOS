@@ -8,3 +8,6 @@ typedef struct
     uint32_t chunks_count;
     void* first_chunk;
 } bitmap_list_t;
+
+void mm_init(void);
+void mm_initblock(struct multiboot_mmap_entry* block);

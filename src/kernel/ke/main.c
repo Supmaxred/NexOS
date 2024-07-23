@@ -15,6 +15,14 @@ uint32_t ke_systime = 0;
 
 void sleep(uint32_t ms)
 {
+    if(ms < 0)
+    {
+        cli();
+        
+        while(1)
+            hlt();
+    }
+
     uint32_t curtime = ke_clock;
     uint32_t tartime = curtime + ms;
 
@@ -24,13 +32,6 @@ void sleep(uint32_t ms)
 
 int testbit(int num, int bit) {
     return (num & (1 << bit)) != 0;
-}
-
-int test;
-
-void testfun()
-{
-
 }
 
 void kernel_main(multiboot_info_t* _multiboot)
@@ -59,7 +60,6 @@ void kernel_main(multiboot_info_t* _multiboot)
             struct multiboot_mmap_entry *me = (struct multiboot_mmap_entry*)(mb->mmap_addr + i);
             printf("addr = %x, len = %x, size = %x, type = %i\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type);
         }
-        printf("test = %x, testfun = %x\n", &test, testfun);
     }
     //pg_init();
     kshell_main();

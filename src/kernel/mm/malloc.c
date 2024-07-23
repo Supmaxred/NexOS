@@ -1,12 +1,29 @@
 #include <stdint.h>
+#include "ke.h"
+#include "mm.h"
 
 #define BLOCK_SIZE 1024 // 1 KB
 #define UINT32BITS (8 * sizeof(uint32_t))
 
 #define calcsize(chunks, bitmaps) ((chunks) * BLOCK_SIZE + (bitmaps) * sizeof(uint32_t))
 
-uint32_t* pagebm;
-void* pagedata;
+void mm_init()
+{
+    if(testbit(mb->flags, 6))
+    {
+        for (size_t i = 0; i < mb->mmap_length; i += sizeof(struct multiboot_mmap_entry))
+        {
+            struct multiboot_mmap_entry *me = (struct multiboot_mmap_entry*)(mb->mmap_addr + i);
+            if(me->type == MULTIBOOT_MEMORY_AVAILABLE)
+                mm_initblock(me);
+        }
+    }
+}
+
+void mm_initblock(struct multiboot_mmap_entry* block)
+{
+
+}
 
 void calc_chunks_and_bitmaps(uint32_t size, uint32_t* num_chunks, uint32_t* num_bitmaps) {
     uint32_t chunks = size / BLOCK_SIZE;
