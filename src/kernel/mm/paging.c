@@ -13,7 +13,7 @@ uint32_t pagedir[PAGE_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
 uint32_t pagetable[PAGE_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
 uint32_t pagetablefb[PAGE_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
 
-void mm_init()
+void pg_init()
 {
     for (int i = 0; i < PAGE_ENTRIES; i++)
     {
