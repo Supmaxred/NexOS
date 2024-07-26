@@ -7,7 +7,7 @@
 
 #define BLOCK_SIZE 1024 // 1 KB
 #define PAGE_SIZE 4096 // 4 KB
-#define UINT32BITS (8 * sizeof(uint32_t))
+#define UINT32BITS (32)
 
 #define BSIZE sizeof(uint32_t)
 
@@ -15,8 +15,9 @@
 
 #define test_bit(val, bit) ((val & bit) != 0)
 #define set_bit(val, bit) val |= bit
+#define clear_bit(val, bit) val &= ~bit
 #define next_bit(bit) bit <<= 1;
-#define calc_pageaddr(bitmapi, bit) (((bitmapi << 3) * sizeof(uint32_t) + bit) * BLOCK_SIZE)
+#define calc_pageaddr(bitmapi, bit) (((bitmapi) * UINT32BITS + bit) * BLOCK_SIZE)
 #define test_bitn(num, bitn) ((num & (1 << bitn)) != 0)
 
 bitmap_list_t* firstblock = NULL;
@@ -114,10 +115,10 @@ void** mm_initmemblock(struct multiboot_mmap_entry* block)
     calc_blocks_and_bitmaps(block->len, &blocks, &bitmaps);
 
     bitmap_list_t* entry = (bitmap_list_t*)((uint32_t)block->addr + blocks * BLOCK_SIZE + bitmaps * sizeof(uint32_t));
-    entry->bitmap_count = bitmaps;
     entry->blocks_count = blocks;
     entry->first_block = (void*)((uint32_t)block->addr);
     entry->first_bitmap = (uint32_t*)((uint32_t)block->addr + blocks * BLOCK_SIZE);
+    entry->search_next_startblock = 0;
     entry->next = NULL;
 
     if(firstblock == NULL)
@@ -126,37 +127,125 @@ void** mm_initmemblock(struct multiboot_mmap_entry* block)
     return &entry->next;
 }
 
-void* malloc()
+void* malloc(uint32_t count, uint32_t align_up)
 {
-    bitmap_list_t* curlist = firstblock;
+    if(count == 0 || count > 32)
+        return NULL;
+    
+    if(align_up == 0)
+        align_up = 1;
+
+    bitmap_list_t* curblock = firstblock;
     while(1)
     {
-        for(uint32_t i = 0; i < curlist->bitmap_count; i++)
+        const uint32_t repeatcount = curblock->blocks_count / UINT32BITS + 1;
+        char isnotset_snsb = 1;
+        for(uint32_t i = curblock->search_next_startblock; i < repeatcount; i++)
         {
-            uint32_t* bitmap = &(curlist->first_bitmap)[i];
+            uint32_t* bitmap = &(curblock->first_bitmap)[i];
 
             if(*bitmap == 0xffffFFFF)
                 continue;
 
             uint32_t bit = 1;
-            for( uint32_t j = 0; j < UINT32BITS; j++)
+            uint32_t streak = 0;
+            printf("prev %b\n", *bitmap); //for debug
+            for(uint32_t j = 0; j < UINT32BITS; j++)
             {
+                if(!streak) {
+                    if(32 - j < count) {
+                        break;
+                    }
+
+                    if(j % align_up != 0) {
+                        continue;
+                    }
+                }
+
                 if(!test_bit(*bitmap, bit))
                 {
-                    set_bit(*bitmap, bit);
-                    return (void*)((uintptr_t)(curlist->first_block) + calc_pageaddr(i, j));
+                    streak++;
+
+                    if(isnotset_snsb)
+                    {
+                        curblock->search_next_startblock = i;
+                        isnotset_snsb = 0;
+                    }
+
+                    if(streak == count)
+                    {
+                        j -= streak - 1;
+
+                        bit = 1 << j;
+                        for (uint32_t k = 0; k < streak; k++)
+                        {
+                            set_bit(*bitmap, bit);
+                            next_bit(bit);
+                        }
+                        printf("new  %b\n", *bitmap); //for debug
+                        return (void*)((uintptr_t)(curblock->first_block) + calc_pageaddr(i, j - streak));
+                    }
+                }
+                else
+                {
+                    streak = 0;
                 }
                 next_bit(bit);
             }
         }
 
-        if(curlist->next == NULL) {
+        if(curblock->next == NULL) {
             return NULL;
         }
         
-        curlist = curlist->next;
+        curblock = curblock->next;
     }
     return NULL;
+}
+
+void mfree(void* addr, uint32_t count)
+{
+    uint32_t addrint = (uint32_t)addr;
+
+    if(count == 0 || count > 32)
+        return;
+
+    bitmap_list_t* curblock = firstblock;
+    while(1)
+    {
+        if(addrint >= (uint32_t)curblock->first_block && addrint <= (uint32_t)curblock->first_block + curblock->blocks_count)
+        {
+            addrint -= (uint32_t)curblock->first_block;
+            addrint /= BLOCK_SIZE;
+            uint32_t bitn = addrint % 31;
+            addrint -= bitn;
+            uint32_t bitmapn = addrint / 32;
+            uint32_t* bitmap = &(curblock->first_bitmap)[bitmapn];
+            uint32_t bit = 1 << bitn;
+
+            if(32 - bitn < count) {
+                printf("ERR!1");
+                return;
+            }
+            printf("fprev %b\n", *bitmap); //for debug
+
+            for (uint32_t k = 0; k < count; k++)
+            {
+                clear_bit(*bitmap, bit);
+                next_bit(bit);
+            }
+            printf("fnew  %b\n", *bitmap); //for debug
+            return;
+        }
+        printf("err 1;%x %x\n", addrint, (uint32_t)curblock->first_block);
+
+        if(curblock->next == NULL) {
+            return;
+        }
+        
+        curblock = curblock->next;
+    }
+    return;
 }
 
 void mm_init()

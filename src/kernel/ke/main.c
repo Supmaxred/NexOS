@@ -35,13 +35,6 @@ int testbit(int num, int bit) {
     return (num & (1 << bit)) != 0;
 }
 
-int test;
-
-void testfun()
-{
-
-}
-
 extern uint32_t kernel_start;
 extern uint32_t kernel_end;
 
@@ -62,11 +55,12 @@ void kernel_main(multiboot_info_t* _multiboot)
     printf("kernel_start: %x, kernel_end: %x\n", &kernel_start, &kernel_end);
 
     mm_init();
-
-    //printf("%x\n", malloc());
-    //printf("%x\n", malloc());
-    //printf("%x\n", malloc());
-    //printf("%x\n", malloc());
+    void* oi = malloc(1, 1);
+    void* ye = malloc(1, 1);
+    void* yee = malloc(1, 1);
+    printf("%x\n", yee);
+    mfree(oi, 1);
+    mfree(ye, 4);
 
     for (size_t i = 0; i < 0xffffFFFF; i++)
     {
@@ -75,30 +69,15 @@ void kernel_main(multiboot_info_t* _multiboot)
             printf("%x\n", addr);
     }
 
-//    if(testbit(mb->flags, 0))
+//    for (size_t i = 0; i < 0xffffFFFF; i++)
 //    {
-//        printf("mem_lower = %x, mem_upper = %x\n", mb->mem_lower * 1024, mb->mem_upper * 1024);
-//    }
+//        void* addr = malloc(4);
 //
-//    if(testbit(mb->flags, 5))
-//    {
-//        multiboot_elf_section_header_table_t *multiboot_elf_sec = &(mb->u.elf_sec);
-//
-//        printf ("multiboot_elf_sec: num = %i, size = 0x%x, addr = 0x%x, shndx = 0x%x\n",
-//            (unsigned) multiboot_elf_sec->num, (unsigned) multiboot_elf_sec->size,
-//            (unsigned) multiboot_elf_sec->addr, (unsigned) multiboot_elf_sec->shndx);
-//    }
-//
-//    if(testbit(mb->flags, 6))
-//    {
-//        for (size_t i = 0; i < mb->mmap_length; i += sizeof(struct multiboot_mmap_entry))
-//        {
-//            struct multiboot_mmap_entry *me = (struct multiboot_mmap_entry*)(mb->mmap_addr + i);
-//            printf("addr = %x, len = %x, size = %x, type = %i\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type);
+//        if((i % 0xff) == 0) {
+//            printf("alloc addr: %x\n", addr);
 //        }
-//        printf("test = %x, testfun = %x\n", &test, testfun);
-//        printf("start = %x, end = %x\n", &kernel_start, &kernel_end);
 //    }
+
     //pg_init();
     //kshell_main();
 }
