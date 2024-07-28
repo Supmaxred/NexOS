@@ -18,16 +18,19 @@
 #define clear_bit(val, bit) val &= ~bit
 #define next_bit(bit) bit <<= 1;
 #define calc_pageaddr(bitmapi, bit) (((bitmapi) * UINT32BITS + bit) * BLOCK_SIZE)
-#define test_bitn(num, bitn) ((num & (1 << bitn)) != 0)
+#define test_bitnumber(num, bitn) ((num & (1 << bitn)) != 0)
 
 bitmap_list_t* firstblock = NULL;
 
-uint32_t align_up(uint32_t address, uint32_t align)
-{
-    if (address % align == 0)
+uint32_t align_up(uint32_t address, uint32_t align) {
+    if (align <= 0) {
         return address;
-
-    return (address + align - 1) & ~(align - 1);
+    }
+    uint32_t remainder = address % align;
+    if (remainder == 0) {
+        return address;
+    }
+    return address + align - remainder;
 }
 
 void calc_blocks_and_bitmaps(uint32_t size, uint32_t* num_blocks, uint32_t* num_bitmaps)
@@ -48,33 +51,44 @@ void calc_blocks_and_bitmaps(uint32_t size, uint32_t* num_blocks, uint32_t* num_
     *num_bitmaps = bitmaps;
 }
 
-static void block_setstart(struct multiboot_mmap_entry* block, uint32_t new)
+static inline void block_setstart(struct multiboot_mmap_entry* block, uint32_t new)
 {
     int32_t old = new - block->addr;
     block->addr = new;
     block->len = (old > 0) ? (block->len - (uint32_t)old) : ((block->len - (uint32_t)(-old)));
 }
 
-static void block_setend(struct multiboot_mmap_entry* block, uint32_t new)
+static inline void block_setend(struct multiboot_mmap_entry* block, uint32_t new)
 {
     block->len = new - block->addr;
 }
 
-static uint32_t block_getend(struct multiboot_mmap_entry* block)
+static inline uint32_t block_getend(struct multiboot_mmap_entry* block)
 {
     return block->addr + block->len;
 }
 
-void** mm_initmemblock(struct multiboot_mmap_entry* block)
+static inline uint32_t is_block_under1mb(struct multiboot_mmap_entry* block)
+{
+    return block_getend(block) < 0x100000;
+}
+
+static inline uint32_t is_partofblock_under1mb(struct multiboot_mmap_entry* block)
+{
+    return block_getend(block) >= 0x100000 && block->addr < 0x100000;
+}
+
+bitmap_list_t* mm_initmemblock(struct multiboot_mmap_entry* block)
 {
     //We dont allow memory under 1MB
-    if(block_getend(block) < 0x100000)
+    if(is_block_under1mb(block))
     {
         block->type = MULTIBOOT_MEMORY_RESERVED;
         printf("Chunk is under 1MB\n");
         return NULL;
     }
-    else if(block->addr < 0x100000) // and if block end is under 1 mb
+
+    if(is_partofblock_under1mb(block)) // and if block end is under 1 mb
     {
         block_setstart(block, 0x100000);
     }
@@ -113,7 +127,7 @@ void** mm_initmemblock(struct multiboot_mmap_entry* block)
     uint32_t bitmaps = 0;
 
     calc_blocks_and_bitmaps(block->len, &blocks, &bitmaps);
-
+    
     bitmap_list_t* entry = (bitmap_list_t*)((uint32_t)block->addr + blocks * BLOCK_SIZE + bitmaps * sizeof(uint32_t));
     entry->blocks_count = blocks;
     entry->first_block = (void*)((uint32_t)block->addr);
@@ -124,7 +138,7 @@ void** mm_initmemblock(struct multiboot_mmap_entry* block)
     if(firstblock == NULL)
         firstblock = entry;
 
-    return &entry->next;
+    return entry;
 }
 
 void* malloc(uint32_t count, uint32_t align_up)
@@ -149,7 +163,7 @@ void* malloc(uint32_t count, uint32_t align_up)
 
             uint32_t bit = 1;
             uint32_t streak = 0;
-            printf("prev %b\n", *bitmap); //for debug
+            uint32_t firstj = 0;
             for(uint32_t j = 0; j < UINT32BITS; j++)
             {
                 if(!streak) {
@@ -164,6 +178,11 @@ void* malloc(uint32_t count, uint32_t align_up)
 
                 if(!test_bit(*bitmap, bit))
                 {
+                    if(streak == 0)
+                    {
+                        firstj = j;
+                    }
+
                     streak++;
 
                     if(isnotset_snsb)
@@ -182,8 +201,7 @@ void* malloc(uint32_t count, uint32_t align_up)
                             set_bit(*bitmap, bit);
                             next_bit(bit);
                         }
-                        printf("new  %b\n", *bitmap); //for debug
-                        return (void*)((uintptr_t)(curblock->first_block) + calc_pageaddr(i, j - streak));
+                        return (void*)((uintptr_t)(curblock->first_block) + calc_pageaddr(i, firstj));
                     }
                 }
                 else
@@ -240,33 +258,34 @@ void mfree(void* addr, uint32_t count)
         printf("err 1;%x %x\n", addrint, (uint32_t)curblock->first_block);
 
         if(curblock->next == NULL) {
-            return;
+            break;
         }
         
         curblock = curblock->next;
     }
+    printf("Cant free block with addr %x and size %i\n", addr, count);
     return;
 }
 
 void mm_init()
 {
-    if(test_bitn(mb->flags, 6))
+    if(test_bitnumberumber(mb->flags, 6))
     {
-        uint32_t* nextvar = NULL;
+        bitmap_list_t* newblock = NULL;
         for (size_t i = 0; i < mb->mmap_length; i += sizeof(struct multiboot_mmap_entry))
         {
             struct multiboot_mmap_entry* me = (struct multiboot_mmap_entry*)(mb->mmap_addr + i);
 
-            if(nextvar != NULL) {
-                *nextvar = me;
-                printf("hi %x\n", nextvar);
-                nextvar = NULL;
-            }
-            
             if(me->type == MULTIBOOT_MEMORY_AVAILABLE)  
             {
-                nextvar = mm_initmemblock(me);
-                printf("addr = %x, len = %x, size = %x, type = %i, ret = %x\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type, nextvar);
+                bitmap_list_t* oldblock = newblock;
+                newblock = mm_initmemblock(me);
+
+                if(oldblock) {
+                    oldblock->next = newblock;
+                }
+
+                printf("addr = %x, len = %x, size = %x, type = %i, ret = %x\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type, newblock);
             }
         }
     }
@@ -275,20 +294,4 @@ void mm_init()
         //🙂
         return;
     }
-}
-
-void mmtest()
-{
-    bitmap_list_t* curblock = firstblock;
-    while(1)
-    {
-        printf("block %x, okay %x\n", curblock, curblock->next);
-
-        if(curblock->next == NULL) {
-            return;
-        }
-        
-        curblock = curblock->next;
-    }
-    return;
 }

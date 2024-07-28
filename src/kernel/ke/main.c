@@ -56,12 +56,11 @@ void kernel_main(multiboot_info_t* _multiboot)
 
     mm_init();
     void* oi = malloc(1, 1);
-    void* ye = malloc(1, 1);
+    void* ye = malloc(4, 1);
     void* yee = malloc(1, 1);
-    printf("%x\n", yee);
     mfree(oi, 1);
+    mfree(yee, 1);
     mfree(ye, 4);
-    mmtest();
 
     //for (size_t i = 0; i < 0xffffFFFF; i++)
     //{
