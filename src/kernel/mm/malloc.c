@@ -252,18 +252,21 @@ void mm_init()
 {
     if(test_bitn(mb->flags, 6))
     {
-        void** nextvar = NULL;
+        uint32_t* nextvar = NULL;
         for (size_t i = 0; i < mb->mmap_length; i += sizeof(struct multiboot_mmap_entry))
         {
             struct multiboot_mmap_entry* me = (struct multiboot_mmap_entry*)(mb->mmap_addr + i);
 
-            if(nextvar != NULL)
+            if(nextvar != NULL) {
                 *nextvar = me;
+                printf("hi %x\n", nextvar);
+                nextvar = NULL;
+            }
             
             if(me->type == MULTIBOOT_MEMORY_AVAILABLE)  
             {
                 nextvar = mm_initmemblock(me);
-                printf("addr = %x, len = %x, size = %x, type = %i\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type);
+                printf("addr = %x, len = %x, size = %x, type = %i, ret = %x\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type, nextvar);
             }
         }
     }
@@ -272,4 +275,20 @@ void mm_init()
         //🙂
         return;
     }
+}
+
+void mmtest()
+{
+    bitmap_list_t* curblock = firstblock;
+    while(1)
+    {
+        printf("block %x, okay %x\n", curblock, curblock->next);
+
+        if(curblock->next == NULL) {
+            return;
+        }
+        
+        curblock = curblock->next;
+    }
+    return;
 }

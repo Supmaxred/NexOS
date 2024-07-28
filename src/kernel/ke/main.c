@@ -61,13 +61,14 @@ void kernel_main(multiboot_info_t* _multiboot)
     printf("%x\n", yee);
     mfree(oi, 1);
     mfree(ye, 4);
+    mmtest();
 
-    for (size_t i = 0; i < 0xffffFFFF; i++)
-    {
-        void* addr = malloc();
-        if((i % 0xffff) == 0)
-            printf("%x\n", addr);
-    }
+    //for (size_t i = 0; i < 0xffffFFFF; i++)
+    //{
+    //    void* addr = malloc();
+    //    if((i % 0xffff) == 0)
+    //        printf("%x\n", addr);
+    //}
 
 //    for (size_t i = 0; i < 0xffffFFFF; i++)
 //    {
