@@ -269,24 +269,25 @@ void mfree(void* addr, uint32_t count)
 
 void mm_init()
 {
-    if(test_bitnumberumber(mb->flags, 6))
+    if(test_bitnumber(mb->flags, 6))
     {
         bitmap_list_t* newblock = NULL;
         for (size_t i = 0; i < mb->mmap_length; i += sizeof(struct multiboot_mmap_entry))
         {
             struct multiboot_mmap_entry* me = (struct multiboot_mmap_entry*)(mb->mmap_addr + i);
 
-            if(me->type == MULTIBOOT_MEMORY_AVAILABLE)  
-            {
-                bitmap_list_t* oldblock = newblock;
-                newblock = mm_initmemblock(me);
-
-                if(oldblock) {
-                    oldblock->next = newblock;
-                }
-
-                printf("addr = %x, len = %x, size = %x, type = %i, ret = %x\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type, newblock);
-            }
+//            if(me->type == MULTIBOOT_MEMORY_AVAILABLE)  
+//            {
+//                bitmap_list_t* oldblock = newblock;
+//                newblock = mm_initmemblock(me);
+//
+//                if(oldblock) {
+//                    oldblock->next = newblock;
+//                }
+//
+//                printf("addr = %x, len = %x, size = %x, type = %i, ret = %x\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type, newblock);
+//            }
+            printf("addr = %x, len = %x, size = %x, type = %i, ret = %x\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type, newblock);
         }
     }
     else

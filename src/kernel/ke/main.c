@@ -55,12 +55,14 @@ void kernel_main(multiboot_info_t* _multiboot)
     printf("kernel_start: %x, kernel_end: %x\n", &kernel_start, &kernel_end);
 
     mm_init();
-    void* oi = malloc(1, 1);
-    void* ye = malloc(4, 1);
-    void* yee = malloc(1, 1);
-    mfree(oi, 1);
-    mfree(yee, 1);
-    mfree(ye, 4);
+
+    //mm_init();
+    //void* oi = malloc(1, 1);
+    //void* ye = malloc(4, 1);
+    //void* yee = malloc(1, 1);
+    //mfree(oi, 1);
+    //mfree(yee, 1);
+    //mfree(ye, 4);
 
     //for (size_t i = 0; i < 0xffffFFFF; i++)
     //{

@@ -5,7 +5,7 @@
 #include "pckbd.h"
 #include "video.h"
 
-#define CMD_MAXLEN 20000
+#define CMD_MAXLEN 2000
 
 #define CMDDEF(name) int cmd_##name(int argc, char** argv)
 #define CMD_ENTRY(name) {#name, cmd_##name}

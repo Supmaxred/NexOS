@@ -32,6 +32,7 @@
 #define PITCMD_BCDMODE     (1)
 
 #define PIT_BASEFREQUENCY 1193182
+#define PIT_DELAY_NS 838
 
 uint32_t pit_delayms = 1;
 uint32_t pit_freq = 1;
@@ -49,6 +50,11 @@ void pit_irqhandler(irqctx_t* ctx)
         ke_systime++;
         fb_togglecursor();
     }
+}
+
+void pit_t0countdown_set(uint32_t val)
+{
+    
 }
 
 void pit_setfreq(uint32_t hz)

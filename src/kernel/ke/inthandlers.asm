@@ -31,12 +31,6 @@ section .text
 
 irq_master:
 
-    ;mov ecx, 0
-    ;loop:
-    ;inc ecx
-    ;cmp ecx, 0xffffffff
-    ;jne loop
-
     pusha                    ; Push general registers
 
     mov ax, ds
