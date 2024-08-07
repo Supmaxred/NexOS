@@ -276,17 +276,18 @@ void mm_init()
         {
             struct multiboot_mmap_entry* me = (struct multiboot_mmap_entry*)(mb->mmap_addr + i);
 
-            if(me->type == MULTIBOOT_MEMORY_AVAILABLE)  
-            {
-                bitmap_list_t* oldblock = newblock;
-                newblock = mm_initmemblock(me);
-
-                if(oldblock) {
-                    oldblock->next = newblock;
-                }
-
-                printf("addr = %x, len = %x, size = %x, type = %i, ret = %x\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type, newblock);
-            }
+//            if(me->type == MULTIBOOT_MEMORY_AVAILABLE)  
+//            {
+//                bitmap_list_t* oldblock = newblock;
+//                newblock = mm_initmemblock(me);
+//
+//                if(oldblock) {
+//                    oldblock->next = newblock;
+//                }
+//
+//                printf("addr = %x, len = %x, size = %x, type = %i, ret = %x\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type, newblock);
+//            }
+            printf("addr = %x, len = %x, size = %x, type = %i, ret = %x\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type, newblock);
         }
     }
     else

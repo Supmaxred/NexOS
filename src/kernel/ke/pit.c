@@ -57,6 +57,11 @@ void pit_irqhandler(irqctx_t* ctx)
     }
 }
 
+void pit_t0countdown_set(uint32_t val)
+{
+    
+}
+
 void pit_setfreq(uint32_t hz)
 {
     uint16_t divisor = PIT_BASEFREQUENCY / hz;

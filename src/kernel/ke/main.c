@@ -49,6 +49,8 @@ void kernel_main(multiboot_info_t* _multiboot)
     //uint64_t result = 0x1234567890ABCDEF + 1;
     //printf("%x %x", *((uint32_t*)(&result) + 1), *((uint32_t*)(&result)));
 
+    mm_init();
+
     //mm_init();
     //void* oi = malloc(1, 1);
     //void* ye = malloc(4, 1);
