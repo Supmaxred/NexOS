@@ -89,7 +89,7 @@ int cmd_sleep(int argc, char** argv)
     if(argc > 1)
         ms = stoi(argv[1]);
     
-    sleep(ms);
+    sleepms(ms);
 }
 
 int cmd_uptime(int argc, char** argv)
@@ -117,7 +117,7 @@ int cmd_uptime(int argc, char** argv)
         }
     }
 
-    uint32_t ms = ke_clock;
+    uint32_t ms = (ke_uptimens / (uint64_t)1000000);
 
     uint32_t s = ms / 1000;
     ms = ms % 1000;

@@ -269,7 +269,7 @@ void mfree(void* addr, uint32_t count)
 
 void mm_init()
 {
-    if(test_bitnumberumber(mb->flags, 6))
+    if(test_bitnumber(mb->flags, 6))
     {
         bitmap_list_t* newblock = NULL;
         for (size_t i = 0; i < mb->mmap_length; i += sizeof(struct multiboot_mmap_entry))

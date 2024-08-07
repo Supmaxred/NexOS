@@ -11,23 +11,16 @@
 multiboot_info_t* mb;
 
 uint32_t ke_ticks = 0;
-uint32_t ke_clock = 0;
+uint64_t ke_uptimens = 0;
 uint32_t ke_systime = 0;
 
-void sleep(uint32_t ms)
+void sleepms(uint32_t ms)
 {
-    if(ms < 0)
-    {
-        cli();
-        
-        while(1)
-            hlt();
-    }
+    uint64_t ns = (uint64_t)ms * 1000000;
 
-    uint32_t curtime = ke_clock;
-    uint32_t tartime = curtime + ms;
+    uint64_t tartime = ke_uptimens + ns;
 
-    while(ke_clock < tartime)
+    while(ke_uptimens < tartime)
         hlt();
 }
 
@@ -48,19 +41,21 @@ void kernel_main(multiboot_info_t* _multiboot)
     fb_init();
     pckbd_init();
     pit_init();
-    pit_setfreq(35);
+    pit_setfreq(50);
 
     ke_systime = rtc_update();
 
-    printf("kernel_start: %x, kernel_end: %x\n", &kernel_start, &kernel_end);
+    //printf("kernel_start: %x, kernel_end: %x\n", &kernel_start, &kernel_end);
+    //uint64_t result = 0x1234567890ABCDEF + 1;
+    //printf("%x %x", *((uint32_t*)(&result) + 1), *((uint32_t*)(&result)));
 
-    mm_init();
-    void* oi = malloc(1, 1);
-    void* ye = malloc(4, 1);
-    void* yee = malloc(1, 1);
-    mfree(oi, 1);
-    mfree(yee, 1);
-    mfree(ye, 4);
+    //mm_init();
+    //void* oi = malloc(1, 1);
+    //void* ye = malloc(4, 1);
+    //void* yee = malloc(1, 1);
+    //mfree(oi, 1);
+    //mfree(yee, 1);
+    //mfree(ye, 4);
 
     //for (size_t i = 0; i < 0xffffFFFF; i++)
     //{
@@ -79,5 +74,5 @@ void kernel_main(multiboot_info_t* _multiboot)
 //    }
 
     //pg_init();
-    //kshell_main();
+    kshell_main();
 }

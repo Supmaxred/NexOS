@@ -19,10 +19,10 @@ time_t rtc_update();
 
 extern multiboot_info_t* mb;
 extern uint32_t ke_ticks;
-extern uint32_t ke_clock;
+extern uint64_t ke_uptimens;
 extern uint32_t ke_systime;
 
 extern uint32_t kernel_start;
 extern uint32_t kernel_end;
 
-void sleep(uint32_t ms);
+void sleepms(uint32_t ms);

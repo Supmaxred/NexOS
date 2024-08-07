@@ -25,10 +25,12 @@ static int32_t timezone = SECHOUR * 3;
 
 time_t time(time_t* tim)
 {
+    time_t curtime = ke_systime;
+
     if(tim != 0)
-        *tim = ke_systime;
+        *tim = curtime;
     
-    return ke_systime;
+    return curtime;
 }
 
 char* ctime(const time_t* timer)
