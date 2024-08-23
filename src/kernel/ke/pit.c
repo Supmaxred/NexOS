@@ -68,7 +68,6 @@ void pit_setfreq(uint32_t hz)
 
     pit_freq = hz;
     pit_delayns = PIT_DELAYNS * divisor;
-    printf("%u\n", pit_delayns);
 }
 
 void pit_init()

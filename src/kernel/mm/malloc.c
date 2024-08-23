@@ -242,20 +242,16 @@ void mfree(void* addr, uint32_t count)
             uint32_t bit = 1 << bitn;
 
             if(32 - bitn < count) {
-                printf("ERR!1");
                 return;
             }
-            printf("fprev %b\n", *bitmap); //for debug
 
             for (uint32_t k = 0; k < count; k++)
             {
                 clear_bit(*bitmap, bit);
                 next_bit(bit);
             }
-            printf("fnew  %b\n", *bitmap); //for debug
             return;
         }
-        printf("err 1;%x %x\n", addrint, (uint32_t)curblock->first_block);
 
         if(curblock->next == NULL) {
             break;
@@ -287,7 +283,9 @@ void mm_init()
 //
 //                printf("addr = %x, len = %x, size = %x, type = %i, ret = %x\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type, newblock);
 //            }
-            printf("addr = %x, len = %x, size = %x, type = %i, ret = %x\n", (uint32_t)me->addr, (uint32_t)me->len, me->size, me->type, newblock);
+            printf("addr = %x%x, len = %x%x, size = %x, type = %i\n", (uint32_t)me->addr_high, (uint32_t)me->addr, (uint32_t)me->len_high, (uint32_t)me->len, me->size, me->type);
+            uint64_t len = *((uint64_t*)&me->len);
+            printf("MB:%u\n", len / 1048576);
         }
     }
     else
