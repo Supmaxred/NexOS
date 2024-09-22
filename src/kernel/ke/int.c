@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+
 #include "x86.h"
 #include "serialport.h"
 #include "ke.h"
-
+#include "log.h"
 
 idt_entry_t idt_table[256];
 
@@ -93,10 +94,10 @@ void idt_init() {
 
 void handle_exception(isrctx_t ctx)
 {
-    sp_printf("\nAn exception occurred!\nISR:%i, Name:%s", ctx.intnum, exception_names[ctx.intnum]);
+    LOGDBG("\nAn exception occurred!\nISR:%i, Name:%s", ctx.intnum, exception_names[ctx.intnum]);
     if(ctx.errcode)
-        sp_printf(", Error Code:%x", ctx.errcode >> 3);
-    sp_printf(".\n");
+        LOGDBG(", Error Code:%x", ctx.errcode >> 3);
+    LOGDBG(".\n");
 
     cli();
     while(1)

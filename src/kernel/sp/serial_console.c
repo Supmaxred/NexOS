@@ -39,11 +39,27 @@ void sp_printf(const char* format, ...)
                 sp_puts(buf);
             }   break;
 
+            case 'u':
+            {
+                unsigned int value = va_arg(args, unsigned int);
+                char buf[12];
+                itou(value, buf);
+                sp_puts(buf);
+            }   break;
+
             case 'x':
             {
                 unsigned int value = va_arg(args, unsigned int);
                 char buf[9];
                 itox(value, buf);
+                sp_puts(buf);
+            }   break;
+
+            case 'b':
+            {
+                unsigned int value = va_arg(args, unsigned int);
+                char buf[33];
+                itob(value, buf);
                 sp_puts(buf);
             }   break;
 

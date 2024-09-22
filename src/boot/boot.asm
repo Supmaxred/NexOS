@@ -42,7 +42,8 @@ section .multiboot
 
   ;Graphics
   dd 0    ;Mode, 0 - linear, 1 - text mode
-  dd 1024, 768, 32  ;Width, Height, BPP
+  ;dd 1024, 768, 32  ;Width, Height, BPP
+  dd 640, 480, 32  ;Width, Height, BPP
 
 ;Code
 section .text

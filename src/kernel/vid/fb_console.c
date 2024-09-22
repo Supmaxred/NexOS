@@ -31,32 +31,31 @@ static void _fb_scroll()
 {
     uint32_t row_size = fb_width * sizeof(uint32_t);
 
-    uint32_t* src = fb_pixeladdr(0, 14);
-    uint32_t* dest = fb_pixeladdr(0, 0);
+    uint32_t* src = second_buffer + PIXELADDR(0, 14, fb_width);
+    uint32_t* dest_f = fb_addr + PIXELADDR(0, 0, fb_width);
+    uint32_t* dest_s = second_buffer + PIXELADDR(0, 0, fb_width);
+
+    uint32_t* clear_start_f = fb_addr + PIXELADDR(0, fb_height - 14, fb_width);
+    uint32_t* clear_start_s = second_buffer + PIXELADDR(0, fb_height - 14, fb_width);
 
     uint32_t copy_lines = fb_height - 14;
-
+    
     is_scrolling = 1;
-    memmove(dest, src, copy_lines * row_size);
 
-    uint32_t* clear_start = fb_pixeladdr(0, fb_height - 14);
-    memset(clear_start, 0, 14 * row_size);
+    memmove(dest_f, src, copy_lines * row_size);
+    memmove(dest_s, src, copy_lines * row_size);
+
+    memset(clear_start_f, 0, 14 * row_size);
+    memset(clear_start_s, 0, 14 * row_size);
+
     is_scrolling = 0;
-
-    //for (uint16_t y = 0; y < fb_height; y++)
-    //{
-    //    for (uint16_t x = 0; x < fb_width; x++)
-    //    {
-    //        fb_setpixel(x, y, fb_getpixel(x, y + 14));
-    //    }
-    //}
 }
 
 static void _fb_linefeed()
 {
     cury += TEXTHEIGHT;
 
-    if(cury >= fb_height)
+    if(cury + TEXTHEIGHT >= fb_height)
     {
         cury -= TEXTHEIGHT;
         vcury -= TEXTHEIGHT;
@@ -134,6 +133,11 @@ void fb_togglecursor()
     {
         TOGGLECUR();
     }
+}
+
+curpos_t fb_getcursorpos()
+{
+    return (curpos_t){curx, cury};
 }
 
 void fb_putc(char c)

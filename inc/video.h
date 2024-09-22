@@ -19,15 +19,21 @@ typedef struct rect {
   uint16_t y2;
 } rect_t;
 
+typedef struct curpos {
+    uint16_t x;
+    uint16_t y;
+} curpos_t;
+
 extern uint32_t* fb_addr;
 extern uint32_t fb_pitch;
 extern uint32_t fb_width;
 extern uint32_t fb_height;
 extern uint8_t fb_bpp;
+extern uint32_t second_buffer[1024 * 768];
 
 void fb_init();
 
-static inline uint32_t* fb_pixeladdr(uint32_t x, uint32_t y) 
+static inline uint32_t* fb_pixel_offset(uint32_t x, uint32_t y) 
 {
     return fb_addr + PIXELADDR(x, y, fb_width);
 }
@@ -36,8 +42,9 @@ static inline void fb_setpixel(uint16_t x, uint16_t y, color_t col)
 {
     if(x >= fb_width || y >= fb_height)
         return;
-
-    *((uint32_t*)fb_pixeladdr(x, y)) = col;
+    
+    *((uint32_t*)(second_buffer + PIXELADDR(x, y, fb_width))) = col;
+    *((uint32_t*)(fb_addr + PIXELADDR(x, y, fb_width))) = col;
 }
 
 static inline color_t fb_getpixel(uint16_t x, uint16_t y)
@@ -45,7 +52,7 @@ static inline color_t fb_getpixel(uint16_t x, uint16_t y)
     if(x >= fb_width || y >= fb_height)
         return 0;
 
-    return *((uint32_t*)fb_pixeladdr(x, y));
+    return *((uint32_t*)(second_buffer + PIXELADDR(x, y, fb_width)));
 }
 
 void fb_drawrect(const rect_t* rect, color_t col);
@@ -82,3 +89,4 @@ void fb_drawchar(
 void fb_setcursor(uint8_t vis);
 void fb_togglecursor();
 void fb_putc(char c);
+curpos_t fb_getcursorpos();

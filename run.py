@@ -1,5 +1,7 @@
 import os
 
+ramsize = 1000
+
 def compile_files():
     src_dir = 'src'
     build_dir = 'build'
@@ -40,7 +42,7 @@ def compile_files():
     os.system(f'rm nexos.iso')
     os.system(f'grub-mkrescue -o nexos.iso isobuild')
     #Running an emulator
-    os.system(f'qemu-system-i386 -cdrom nexos.iso -cpu qemu32,+pae -m 8000m')
+    os.system(f'qemu-system-i386 -cdrom nexos.iso -cpu qemu32,+pae -m {ramsize}m')
 
 if __name__ == "__main__":
     compile_files()

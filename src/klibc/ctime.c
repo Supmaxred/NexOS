@@ -7,21 +7,24 @@
 #define SECHOUR 3600
 #define SECDAY 86400
 #define MONPERYEAR 12
+#define DIFFTIME 0x19db1ded53e8000ULL
+#define DIFFDAYS (3 * DAYSPER100YEARS + 17 * DAYSPER4YEARS + 1 * DAYSPERYEAR)
+#define DAYSPERYEAR 365
+#define DAYSPER4YEARS (4*DAYSPERYEAR+1)
+#define DAYSPER100YEARS (25*DAYSPER4YEARS-1)
+#define DAYSPER400YEARS (4*DAYSPER100YEARS+1)
+#define SECONDSPERDAY (24*60*60)
+#define SECONDSPERHOUR (60*60)
+#define LEAPDAY 59
 
-#define is_leap(y) ((((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0)
-
-static int ydays[2] = { 365, 366 };
-
-static int mdays[2][12] = {
-    { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
-    { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }
-};
-
-static struct tm tm;
+static struct tm tm_buf;
 
 static char at_buf[26];
 
 static int32_t timezone = SECHOUR * 3;
+
+static unsigned int g_monthdays[13] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 };
+static unsigned int g_lpmonthdays[13] = { 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366 };
 
 time_t time(time_t* tim)
 {
@@ -45,56 +48,109 @@ struct tm* localtime(const time_t* timer)
     return gmtime(&lt);
 }
 
-struct tm* gmtime(const time_t* timer)
+static inline long leapyears_passed(long days)
 {
-    time_t t = *timer;
-    int days, leap_years;
-    int year = 1970;
-    int month = 0;
-    int current_year_days;
+    long quadcenturies, centuries, quadyears;
+    quadcenturies = days / DAYSPER400YEARS;
+    days -= quadcenturies;
+    centuries = days / DAYSPER100YEARS;
+    days += centuries;
+    quadyears = days / DAYSPER4YEARS;
+    return quadyears - centuries + quadcenturies;
+}
 
+static inline long leapdays_passed(long days)
+{
+    return leapyears_passed(days + DAYSPERYEAR - LEAPDAY + 1);
+}
 
-    tm.tm_sec = t % 60;
-    t /= 60;
-    tm.tm_min = t % 60;
-    t /= 60;
-    tm.tm_hour = t % 24;
-    t /= 24;
+static struct tm* _gmtime_raw(struct tm* ptm, time_t time, int do_dst)
+{
+    unsigned int days, daystoyear, dayinyear, leapdays, leapyears, years, month;
+    unsigned int secondinday, secondinhour;
+    unsigned int* padays;
 
-    days = (int)t;
+    if (time < 0)
+        return 0;
 
-    while (days >= (current_year_days = ydays[is_leap(year)])) {
-        days -= current_year_days;
-        year++;
+    /* Divide into date and time */
+    days = (unsigned int)(time / SECONDSPERDAY);
+    secondinday = time % SECONDSPERDAY;
+
+    /* Shift to days from 1.1.1601 */
+    days += DIFFDAYS;
+
+    /* Calculate leap days passed till today */
+    leapdays = leapdays_passed(days);
+
+    /* Calculate number of full leap years passed */
+    leapyears = leapyears_passed(days);
+
+    /* Are more leap days passed than leap years? */
+    if (leapdays > leapyears)
+    {
+        /* Yes, we're in a leap year */
+        padays = g_lpmonthdays;
+    }
+    else
+    {
+        /* No, normal year */
+        padays = g_monthdays;
     }
 
-    if (is_leap(year)) {
-        if (days == 59) {
-            tm.tm_mon = 1;
-            tm.tm_mday = 29;
-            tm.tm_year = year - 1900;
-            tm.tm_wday = (4 + (t % 7)) % 7;
-            return &tm;
-        }
-        else if (days > 59) {
-            days -= 1;
-        }
-    }
-    tm.tm_yday = days;
+    /* Calculate year */
+    years = (days - leapdays) / 365;
+    ptm->tm_year = years - 299;
 
-    // Calculate month and day
-    for (month = 0; month < 12; month++) {
-        int days_in_month = mdays[is_leap(year)][month];
-        if (days < days_in_month) break;
-        days -= days_in_month;
-    }
+    /* Calculate number of days till 1.1. of this year */
+    daystoyear = years * 365 + leapyears;
 
-    tm.tm_mon = month;
-    tm.tm_mday = days + 1;
-    tm.tm_year = year - 1900;
-    tm.tm_wday = (4 + (t % 7)) % 7;
+    /* Calculate the day in this year */
+    dayinyear = days - daystoyear;
 
-    return &tm;
+    /* Shall we do DST corrections? */
+    ptm->tm_isdst = 0;
+    //if (do_dst)
+    //{
+    //    int yeartime = dayinyear * SECONDSPERDAY + secondinday;
+    //    if (yeartime >= dst_begin && yeartime <= dst_end) // FIXME! DST in winter
+    //    {
+    //        time -= _dstbias;
+    //        days = (unsigned int)(time / SECONDSPERDAY + DIFFDAYS);
+    //        dayinyear = days - daystoyear;
+    //        ptm->tm_isdst = 1;
+    //    }
+    //}
+
+    ptm->tm_yday = dayinyear;
+
+    /* dayinyear < 366 => terminates with i <= 11 */
+    for (month = 0; dayinyear >= padays[month + 1]; month++);
+
+    /* Set month and day in month */
+    ptm->tm_mon = month;
+    ptm->tm_mday = 1 + dayinyear - padays[month];
+
+    /* Get weekday */
+    ptm->tm_wday = (days + 1) % 7;
+
+    /* Calculate hour and second in hour */
+    ptm->tm_hour = secondinday / SECONDSPERHOUR;
+    secondinhour = secondinday % SECONDSPERHOUR;
+
+    /* Calculate minute and second */
+    ptm->tm_min = secondinhour / 60;
+    ptm->tm_sec = secondinhour % 60;
+
+    return ptm;
+}
+
+struct tm* gmtime(const time_t* ptime)
+{
+    if (!ptime)
+        return NULL;
+
+    return _gmtime_raw(&tm_buf, *ptime, 0);
 }
 
 static void _buf_app(char** buf, const char* str, int len)

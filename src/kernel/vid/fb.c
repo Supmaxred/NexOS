@@ -2,12 +2,15 @@
 #include "ke.h"
 #include "res.h"
 #include "serialport.h"
+#include "log.h"
 
 uint32_t* fb_addr;
 uint32_t fb_pitch;
 uint32_t fb_width;
 uint32_t fb_height;
 uint8_t fb_bpp;
+
+uint32_t second_buffer[1024 * 768] = { 0 };
 
 void fb_init()
 {
@@ -17,12 +20,12 @@ void fb_init()
     fb_height = mb->framebuffer_height;
     fb_bpp = mb->framebuffer_bpp;
 
-    sp_printf("fb_addr - %x\n", fb_addr);
-    sp_printf("fb_pitch - %i\n", fb_pitch);
-    sp_printf("fb_width - %i\n", fb_width);
-    sp_printf("fb_height - %i\n", fb_height);
-    sp_printf("fb_bpp - %i\n", fb_bpp);
-    sp_printf("fb_type - %i\n\n", mb->framebuffer_type);
+    LOGDBG("fb_addr - %x\n", fb_addr);
+    LOGDBG("fb_pitch - %i\n", fb_pitch);
+    LOGDBG("fb_width - %i\n", fb_width);
+    LOGDBG("fb_height - %i\n", fb_height);
+    LOGDBG("fb_bpp - %i\n", fb_bpp);
+    LOGDBG("fb_type - %i\n\n", mb->framebuffer_type);
 }
 
 void fb_drawrect(const rect_t* rect, color_t col)

@@ -2,6 +2,7 @@
 #include "ke.h"
 #include "serialport.h"
 #include "video.h"
+#include "log.h"
 
 #define PITPORT_CH0 0x40
 #define PITPORT_CH1 0x41
@@ -41,18 +42,19 @@ uint32_t pit_delayns;
 
 static uint32_t counterns = 0;
 
+
 void pit_irqhandler(irqctx_t* ctx)
 {
     ke_ticks++;
 
     ke_uptimens += pit_delayns;
-
     counterns += pit_delayns;
-    //printf("%u\n", counterns);
+
     if(counterns >= S2NS)
     {
         counterns -= S2NS;
         ke_systime++;
+
         fb_togglecursor();
     }
 }

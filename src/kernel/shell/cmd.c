@@ -140,6 +140,9 @@ int cmd_date(int argc, char** argv)
     time_t curtim = time(NULL);
     struct tm* curdat = localtime(&curtim);
     printf("%s", asctime(curdat));
+    curtim = rtc_update();
+    curdat = localtime(&curtim);
+    printf("%s", asctime(curdat));
 }
 
 int cmd_test(int argc, char** argv)

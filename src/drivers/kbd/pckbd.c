@@ -18,6 +18,16 @@ uint8_t is_disabled;
 uint8_t is_shifted = 0;
 buffer_t buf;
 
+void pckbd_enable()
+{
+    is_disabled = 0;
+}
+
+void pckbd_disable()
+{
+    is_disabled = 1;
+}
+
 int pckbd_getch()
 {
     if(buf.start == buf.end)
@@ -71,16 +81,6 @@ void pckbd_irqhandler(irqctx_t* ctx)
 
 void pckbd_init()
 {
-    is_disabled = 1;
+    pckbd_enable();
     idt_setirqhandler(1, pckbd_irqhandler, 1);
-}
-
-void pckbd_enable()
-{
-    is_disabled = 0;
-}
-
-void pckbd_disable()
-{
-    is_disabled = 0;
 }

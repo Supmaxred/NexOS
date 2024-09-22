@@ -43,8 +43,9 @@ cmd_t cmds[] = {
 
 void kshell_drawlogo()
 {
-    fb_alphablt(0, 0, 64, 64, nexlogo, 255);
+    curpos_t cpos = fb_getcursorpos();
     puts("\n\n\n\n");
+    fb_alphablt(cpos.x, cpos.y, 64, 64, nexlogo, 255);
 }
 
 void kshell_printsol()
@@ -134,6 +135,19 @@ void kshell_procceschar(char ch)
     {
         puts("\b \b");
         cmd_buffer[--cmd_bufferlen] = '\0';
+        return;
+    }
+
+    if(ch == 18 && cmd_bufferlen > 0)
+    {
+        puts("\b");
+        --cmd_bufferlen;
+        return;
+    }
+
+    if(ch == 17 && cmd_bufferlen < strlen(cmd_buffer))
+    {
+        putch(cmd_buffer[cmd_bufferlen++]);
         return;
     }
 

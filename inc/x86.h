@@ -89,7 +89,7 @@ void irq_setmask(uint8_t irqline);
 void irq_clearmask(uint8_t irqline);
 void irq_clear(void);
 //seg.c
-void seg_init(void);
+void gdt_init(void);
 //gdt_flush.asm
 void gdt_flush(gdtr_t* gtdr);
 

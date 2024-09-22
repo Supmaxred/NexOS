@@ -14,42 +14,6 @@ void puts(const char* str)
         fb_putc(*str++);
 }
 
-void itou(unsigned int value, char* buf)
-{
-    int i = 0;
-    if (value == 0)
-    {
-        buf[i++] = '0';
-    }
-    else
-    {
-        while (value > 0)
-        {
-            buf[i++] = (value % 10) + '0';
-            value /= 10;
-        }
-    }
-    buf[i] = '\0';
-
-    for (int j = 0; j < i / 2; j++)
-    {
-        char temp = buf[j];
-        buf[j] = buf[i - j - 1];
-        buf[i - j - 1] = temp;
-    }
-}
-
-void itob(unsigned int value, char* buf)
-{
-    int len = 32;
-
-    for (int i = len - 1; i >= 0; i--)
-    {
-        buf[i] = (value & 1) + '0';
-        value >>= 1;
-    }
-    buf[len] = '\0';
-}
 void printf(const char* format, ...)
 {
     va_list args;
