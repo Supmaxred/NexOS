@@ -32,7 +32,7 @@
 #define PITCMD_BINARYMODE  (0)
 #define PITCMD_BCDMODE     (1)
 
-#define PIT_BASEFREQUENCY 1193182
+#define PIT_BASEFREQUENCY 1193181
 #define PIT_DELAYNS 838 //1 000 000 000 / PIT_BASEFREQUENCY
 
 #define S2NS 1000000000 //1 000 000 000
@@ -45,6 +45,7 @@ static uint32_t counterns = 0;
 
 void pit_irqhandler(irqctx_t* ctx)
 {
+    LOGDBG("3");
     ke_ticks++;
 
     ke_uptimens += pit_delayns;
@@ -55,26 +56,32 @@ void pit_irqhandler(irqctx_t* ctx)
         counterns -= S2NS;
         ke_systime++;
 
-        fb_togglecursor();
+        //fb_togglecursor();
     }
 }
 
 void pit_setfreq(uint32_t hz)
 {
+    LOG_STEP_START("Setting HZ of timer");
     uint16_t divisor = PIT_BASEFREQUENCY / hz;
 
     outb(PITPORT_CMD, PITCMD_BINARYMODE | PITCMD_MODE3 | (PITCMD_LOBYTE | PITCMD_HIBYTE));
+
+    //bochs_brkpt();
 
     outb(PITPORT_CH0, INT16LOW(divisor));
     outb(PITPORT_CH0, INT16HIGH(divisor));
 
     pit_freq = hz;
     pit_delayns = PIT_DELAYNS * divisor;
+    LOG_STEP_END();
 }
 
 void pit_init()
 {
+    LOG_STEP_START("Initializing PIT");
     counterns = 0;
 
     idt_setirqhandler(0, pit_irqhandler, 1);
+    LOG_STEP_END();
 }

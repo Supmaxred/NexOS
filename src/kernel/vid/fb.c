@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "video.h"
 #include "ke.h"
 #include "res.h"

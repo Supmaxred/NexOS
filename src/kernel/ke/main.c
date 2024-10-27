@@ -7,6 +7,7 @@
 #include "pckbd.h"
 #include "ke.h"
 #include "mem.h"
+#include "log.h"
 
 multiboot_info_t* mb;
 
@@ -32,28 +33,30 @@ void sleepms(uint32_t ms)
         hlt();
 }
 
-int testbit(int num, int bit) {
-    return (num & (1 << bit)) != 0;
-}
+void panic(char* str)
+{
+    LOG("\nKernel panic: %s", str);
 
-extern uint32_t kernel_start;
-extern uint32_t kernel_end;
+    cli();
+    loop: hlt(); goto loop;
+}
 
 void kernel_main(multiboot_info_t* _multiboot)
 {
     mb = _multiboot;
 
+    init_serial();
     fb_init();
     gdt_init();
     idt_init();
-    init_serial();
     pckbd_init();
     pit_init();
     pit_setfreq(36);
+    //panic("lox");
 
     ke_systime = rtc_update();
 
-    pmm_init();
+    //pmm_init();
 
     //pg_init();
     kshell_main();

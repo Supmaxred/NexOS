@@ -1,12 +1,8 @@
 #include <stdint.h>
 #include <stddef.h>
-#include <stdlib.h>
 #include <time.h>
 
 #include "multiboot.h"
-
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#define min(a, b) ((a) < (b) ? (a) : (b))
 
 #define INT16LOW(v) (((v) >> 8) & 0xFF)
 #define INT16HIGH(v) ((v) & 0xFF)
@@ -22,7 +18,9 @@ extern uint32_t ke_ticks;
 extern uint64_t ke_uptimens;
 extern uint32_t ke_systime;
 
-extern uint32_t kernel_start;
-extern uint32_t kernel_end;
+extern uint32_t vkernel_start;
+extern uint32_t vkernel_end;
 
 void sleepms(uint32_t ms);
+
+void panic(char* str);

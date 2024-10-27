@@ -71,7 +71,9 @@ void idt_setirqhandler(uint8_t line, irq_handler handler, uint8_t enable)
         irq_clearmask(line);
 }
 
-void idt_init() {
+void idt_init()
+{
+    LOG_STEP_START("Initializing IDT");
     idtr.offset = (uintptr_t)&idt_table;
     idtr.limit = sizeof(idt_table) - 1;
 
@@ -90,6 +92,7 @@ void idt_init() {
 
     lidt(&idtr);
     sti();
+    LOG_STEP_END();
 }
 
 void handle_exception(isrctx_t ctx)

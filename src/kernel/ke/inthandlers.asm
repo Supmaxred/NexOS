@@ -1,3 +1,5 @@
+section .text
+
 extern handle_irqint
 extern handle_exception
 
@@ -27,10 +29,8 @@ isr_%+%1:
     isr_general %1
 %endmacro
 
-section .text
-
 irq_master:
-
+    xchg bx, bx
     pusha                    ; Push general registers
 
     mov ax, ds

@@ -7,11 +7,11 @@
 typedef struct
 {
     void* next;
-    uint32_t search_next_startblock;
+    uint32_t last_search;
     uint32_t* first_bitmap;
     uint32_t blocks_count;
     void* first_block;
-} bitmap_list_t;
+} mmap_entry_t;
 
 void pmm_init(void);
 void pmm_initblock(struct multiboot_mmap_entry* block);

@@ -1,0 +1,12 @@
+fb_addr - FFFFFFFF
+fb_pitch - -1
+fb_width - -1
+fb_height - -1
+fb_bpp - 255
+fb_type - 255
+
+- Initializing IDT [ OK ]
+- Initializing PIT [ OK ]
+- Setting HZ of timer [ OK ]
+
+Kernel panic: lox

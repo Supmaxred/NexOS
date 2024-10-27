@@ -30,7 +30,7 @@ def compile_files():
                 if file.endswith('.asm'):
                     os.system(f'nasm -f elf32 {src_file_path} -o {build_file_path}')
                 elif file.endswith('.c'):
-                    os.system(f'gcc -I{include_dir} -c {src_file_path} -o {build_file_path} -m32 -nostdlib -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs -ffreestanding -O2')
+                    os.system(f'gcc -I{include_dir} -c {src_file_path} -o {build_file_path} -m32 -nostdlib -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs -ffreestanding')
                 
                 object_files = f'{object_files}{build_file_path} '
 

@@ -1,71 +1,94 @@
 bits 32
-global start
+
 extern kernel_main
 
-; The magic field should contain this. 
-%define MULTIBOOT_HEADER_MAGIC                  0x1BADB002
-
-; This should be in %eax. 
-%define MULTIBOOT_BOOTLOADER_MAGIC              0x2BADB002
-
-; Alignment of multiboot modules. 
-%define MULTIBOOT_MOD_ALIGN                     0x00001000
-
-; Alignment of the multiboot info structure. 
-%define MULTIBOOT_INFO_ALIGN                    0x00000004
-
-; Flags set in the ’flags’ member of the multiboot header. 
-
-; Align all boot modules on i386 page (4KB) boundaries. 
-%define MULTIBOOT_PAGE_ALIGN                    0x00000001
-
-; Must pass memory information to OS. 
-%define MULTIBOOT_MEMORY_INFO                   0x00000002
-
-; Must pass video information to OS. 
-%define MULTIBOOT_VIDEO_MODE                    0x00000004
-
-%define FLAGS (MULTIBOOT_PAGE_ALIGN | MULTIBOOT_VIDEO_MODE | MULTIBOOT_MEMORY_INFO)
-%define CHECKSUM -(MULTIBOOT_HEADER_MAGIC + FLAGS)
+%include "mb.inc"
 
 %define STACKSIZE 1024 * 16
+%define VIRTUAL_OFFSET 0xC0000000
+%define GDT_BASE (0xFFFFFFFF - (VIRTUAL_OFFSET - 1))
 
-section .multiboot
-  ;Multiboot definition
-  align 4
-  ;Required
-  dd MULTIBOOT_HEADER_MAGIC
-  dd FLAGS
-  dd CHECKSUM
+; Stack
+section .bss
+align 4
+stack_bottom:
+    resb STACKSIZE
+stack_top:
 
-  dd 0, 0, 0, 0, 0
+; Multiboot definition
+section .setup
+align 4
+    
+    ; Required
+    dd MULTIBOOT_HEADER_MAGIC
+    dd FLAGS
+    dd CHECKSUM 
 
-  ;Graphics
-  dd 0    ;Mode, 0 - linear, 1 - text mode
-  ;dd 1024, 768, 32  ;Width, Height, BPP
-  dd 640, 480, 32  ;Width, Height, BPP
+    dd 0, 0, 0, 0, 0    
+    ; Graphics
 
-;Code
+    dd 0    ; Mode, 0 - linear, 1 - text mode
+
+    dd 1024, 768, 32  ; Width, Height, BPP
+
+align 4
+tmp_gdtr:
+    dw ((3 * 8) - 1)
+    dd tmp_gdt
+
+align 4
+tmp_gdt:
+	; NULL DESCRIPTOR 
+	dw	0x0000
+	dw	0x0000
+	dw	0x0000
+	dw	0x0000
+
+	; KERNEL CODE 
+	dw	0xFFFF		; segment limit 15-00 
+	dw	0x0000		; base address 15-00 
+	db	0x00		; base address 23-16 
+	db	0x9A		; P=1 DPL=00 S=1 TYPE=1010 (exec;read) 
+	db	0xCF		; G=1 DB=1 0=0 AVL=0 SEGLIM=1111 
+	db	GDT_BASE >> 24	; base address 31-24 
+
+	; KERNEL DATA
+	dw	0xFFFF		; segment limit 15-00 
+	dw	0x0000		; base address 15-00 
+	db	0x00		; base address 23-16 
+	db	0x92		; P=1 DPL=00 S=1 TYPE=0010 (read;write) 
+	db	0xCF		; G=1 DB=1 0=0 AVL=0 SEGLIM=1111 
+	db	GDT_BASE >> 24	; base address 31-24 
+tmp_gdt_end:
+
+global start
+start:
+    cli
+    jmp gdt_flush
+
+    lgdt [tmp_gdtr]
+
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
+    jmp 0x08:gdt_flush
+
 section .text
 
-  ;Entry point
-start:
-  cli
-  mov esp, stack_top
+gdt_flush:
+    mov esp, stack_top
 
-  push ebx
+    push dword 0
+    popf
 
-  call kernel_main
+    push ebx
+    call kernel_main
 
-  add esp, 4
-
-  cli
-  halt:
+    cli
+halt:
     hlt
     jmp halt
-
-  ;Stack
-  section .bss
-  stack_bottom:
-    resb STACKSIZE
-  stack_top:
