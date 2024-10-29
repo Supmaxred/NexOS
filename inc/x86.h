@@ -25,6 +25,20 @@ typedef struct {
 } __attribute__((packed)) idtr_t;
 
 typedef struct {
+    uint32_t present     : 1;       // Page present in memory
+    uint32_t rw          : 1;       // Read/write flag
+    uint32_t us          : 1;       // User/supervisor flag
+    uint32_t pwt         : 1;       // Page-level write-through
+    uint32_t pcd         : 1;       // Page-level cache disable
+    uint32_t accessed    : 1;       // Accessed flag
+    uint32_t dirty       : 1;       // Dirty flag (only for 4 MB pages)
+    uint32_t page_size   : 1;       // Page size flag (0 = 4 KB, 1 = 4 MB)
+    uint32_t global      : 1;       // Global flag (only for 4 MB pages)
+    uint32_t avail       : 3;
+    uint32_t page_table_base : 20;  // Base address of the page table (aligned to 4 KB)
+} pde_t;
+
+typedef struct {
     uint16_t limit_low : 16;        // Low bits of segment limit
     uint16_t offset_low : 16;       // Low bits of segment base address
     uint8_t offset_middle : 8;      // Middle bits of segment base address
