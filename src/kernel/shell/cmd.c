@@ -156,7 +156,7 @@ int cmd_test(int argc, char** argv)
         {
             for (uint32_t i = 0; i < arg; i++)
             {
-                putch('\n');
+                _fb_scroll();
             }
             
         }   break;

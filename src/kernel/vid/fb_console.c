@@ -3,8 +3,8 @@
 
 #include "video.h"
 
-#define FONTHEIGHT 13
-#define TEXTHEIGHT FONTHEIGHT + 1
+#define FONT_HEIGHT 13
+#define TEXT_HEIGHT (FONT_HEIGHT + 1)
 #define FONTWIDTH 8
 #define TABSPACES 4
 
@@ -27,38 +27,38 @@ color_t forecolor = RGB0(255, 255, 255);
 extern uint32_t fb_width;
 extern uint32_t fb_height;
 
-static void _fb_scroll()
+void _fb_scroll()
 {
     uint32_t row_size = fb_width * sizeof(uint32_t);
 
-    uint32_t* src = second_buffer + PIXELADDR(0, 14, fb_width);
+    uint32_t* src = second_buffer + PIXELADDR(0, TEXT_HEIGHT, fb_width);
     uint32_t* dest_f = fb_addr + PIXELADDR(0, 0, fb_width);
     uint32_t* dest_s = second_buffer + PIXELADDR(0, 0, fb_width);
 
-    uint32_t* clear_start_f = fb_addr + PIXELADDR(0, fb_height - 14, fb_width);
-    uint32_t* clear_start_s = second_buffer + PIXELADDR(0, fb_height - 14, fb_width);
+    uint32_t* clear_start_f = fb_addr + PIXELADDR(0, fb_height - TEXT_HEIGHT, fb_width);
+    uint32_t* clear_start_s = second_buffer + PIXELADDR(0, fb_height - TEXT_HEIGHT, fb_width);
 
-    uint32_t copy_lines = fb_height - 14;
+    uint32_t copy_lines = fb_height - TEXT_HEIGHT;
     
     is_scrolling = 1;
 
     memmove(dest_f, src, copy_lines * row_size);
     memmove(dest_s, src, copy_lines * row_size);
 
-    memset(clear_start_f, 0, 14 * row_size);
-    memset(clear_start_s, 0, 14 * row_size);
+    memset(clear_start_f, 0, TEXT_HEIGHT * row_size);
+    memset(clear_start_s, 0, TEXT_HEIGHT * row_size);
 
     is_scrolling = 0;
 }
 
 static void _fb_linefeed()
 {
-    cury += TEXTHEIGHT;
+    cury += TEXT_HEIGHT;
 
-    if(cury + TEXTHEIGHT >= fb_height)
+    if(cury + TEXT_HEIGHT >= fb_height)
     {
-        cury -= TEXTHEIGHT;
-        vcury -= TEXTHEIGHT;
+        cury -= TEXT_HEIGHT;
+        vcury -= TEXT_HEIGHT;
         _fb_scroll();
     }
 }
@@ -76,7 +76,7 @@ static void _fb_curwalk()
 
 static void _fb_curup()
 {
-    cury -= TEXTHEIGHT;
+    cury -= TEXT_HEIGHT;
 
     if(cury < 0)
         cury = 0;
