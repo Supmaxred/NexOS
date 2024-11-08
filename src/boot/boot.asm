@@ -64,7 +64,6 @@ tmp_gdt_end:
 global start
 start:
     cli
-    jmp gdt_flush
 
     lgdt [tmp_gdtr]
 

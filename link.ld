@@ -2,11 +2,11 @@ OUTPUT_ARCH(i386);
 OUTPUT_FORMAT(elf32-i386);
 ENTRY(start)
 
-K_OFFSET = 0x00000000;
+K_OFFSET = 0xC0000000;
 
 SECTIONS
 {
-	. = 0x100000;
+	. = 0x00100000;
 
 	vkernel_start = . + K_OFFSET;
     pkernel_start = .;
