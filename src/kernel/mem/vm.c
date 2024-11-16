@@ -2,7 +2,6 @@
 #include "x86.h"
 #include "ke.h"
 
-#define PAGE_SIZE 0x1000
 #define PAGE_ENTRIES 1024
 
 #define PTSIZE 1024 * 3

@@ -1,7 +1,7 @@
 #include <stdint.h>
 
-#define RGB0(r, g, b)       ( (uint32_t)(((r) << 16) | ((g) << 8) | (b)) )
-#define RGBA(r, g, b, a)    ( (uint32_t)(((r) << 16) | ((g) << 8) | (b) | (a << 24)) )
+#define RGB0(r, g, b)       ( (uint32_t)(((r) << 16) | ((g) << 8) | (b) | (0xFF << 24)) )
+#define RGBA(r, g, b, a)    ( (uint32_t)(((r) << 16) | ((g) << 8) | (b) | (a    << 24)) )
 
 #define R_PART(c) ((c) >> 16 & 0xff)
 #define G_PART(c) ((c) >> 8 & 0xff)

@@ -56,7 +56,7 @@ void pit_irqhandler(irqctx_t* ctx)
         counterns -= S2NS;
         ke_systime++;
 
-        //fb_togglecursor();
+        fb_togglecursor();
     }
 }
 

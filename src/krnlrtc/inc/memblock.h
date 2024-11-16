@@ -1,27 +1,6 @@
 #pragma once
+#include <multiboot.h>
 #include <stdint.h>
-#include "linker.h"
-
-#define BITMAP_STACK_SIZE 64
-#define PAGE_SIZE 0x1000
-#define PAGE_ENTRIES 1024
-#define PAGE_PRESENT 0x1
-#define PAGE_WRITE 0x2
-#define PAGE_USER 0x4
-
-typedef struct
-{
-    void* next;
-    uint32_t last_search;
-    uint32_t* first_bitmap;
-    uint32_t blocks_count;
-    void* first_block;
-} mmap_entry_t;
-
-void pmm_init(void);
-void pmm_initblock(struct multiboot_mmap_entry* block);
-void* malloc(uint32_t count, uint32_t align_up);
-void mfree(void* addr, uint32_t count);
 
 static inline void block_setstart(struct multiboot_mmap_entry* block, uint32_t newa)
 {
@@ -83,6 +62,12 @@ static inline void block_cut(struct multiboot_mmap_entry* block, uint32_t cut_st
 
     if(block->len == 0)
         block->type = MULTIBOOT_MEMORY_RESERVED;
+}
+
+static inline void* block_fsalloc(struct multiboot_mmap_entry* block, uint32_t size)
+{
+    block_addstart(block, size);
+    return (void*)(block->addr - size);
 }
 
 static inline void* block_fealloc(struct multiboot_mmap_entry* block, uint32_t size)

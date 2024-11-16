@@ -5,13 +5,11 @@ ramsize = 1000
 def compile_files():
     src_dir = 'src'
     build_dir = 'build'
-    include_dir = 'inc'
+    include_dirs = ['inc', 'src/krnlrtc/inc/']
     
     # Creating build folder if not exist
     if not os.path.exists(build_dir):
         os.makedirs(build_dir)
-    
-    
 
     object_files = ''
 
@@ -26,22 +24,24 @@ def compile_files():
                 
                 print(f'-{os.path.basename(file)}')
 
+                include_flags = ' '.join([f'-I{dir}' for dir in include_dirs])
+
                 # Compiling!
                 if file.endswith('.asm'):
                     os.system(f'nasm -f elf32 {src_file_path} -o {build_file_path}')
                 elif file.endswith('.c'):
-                    os.system(f'gcc -I{include_dir} -c {src_file_path} -o {build_file_path} -m32 -nostdlib -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs -ffreestanding')
+                    os.system(f'gcc {include_flags} -c {src_file_path} -o {build_file_path} -m32 -nostdlib -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs -ffreestanding')
                 
                 object_files = f'{object_files}{build_file_path} '
 
-    #Linking
+    # Linking
     os.system(f'ld -m elf_i386 -T link.ld -o kernel {object_files}')
 
     os.system(f'rm isobuild/boot/kernel.bin')
     os.system(f'mv kernel isobuild/boot/kernel.bin')
     os.system(f'rm nexos.iso')
     os.system(f'grub-mkrescue -o nexos.iso isobuild')
-    #Running an emulator
+    # Running an emulator
     os.system(f'qemu-system-i386 -cdrom nexos.iso -cpu qemu32,+pae -m {ramsize}m')
 
 if __name__ == "__main__":

@@ -6,18 +6,20 @@
 #include "ke.h"
 #include "mem.h"
 #include "log.h"
+#include "math.h"
+#include "memblock.h"
 
 #define UINT32BITS (32)
 
 #define BSIZE sizeof(uint32_t)
 
-#define calcsize(blocks, bitmaps) ((blocks) * BLOCK_SIZE + (bitmaps) * sizeof(uint32_t))
+#define calcsize(blocks, bitmaps) ((blocks) * PAGE_SIZE + (bitmaps) * sizeof(uint32_t))
 
 #define test_bit(val, bit) ((val & bit) != 0)
 #define set_bit(val, bit) val |= bit
 #define clear_bit(val, bit) val &= ~bit
 #define next_bit(bit) bit <<= 1;
-#define calc_pageaddr(bitmapi, bit) (((bitmapi) * UINT32BITS + bit) * BLOCK_SIZE)
+#define calc_pageaddr(bitmapi, bit) (((bitmapi) * UINT32BITS + bit) * PAGE_SIZE)
 #define test_bitno(num, bitn) ((num & (1 << bitn)))
 
 mmap_entry_t bitmap_stack[BITMAP_STACK_SIZE];
@@ -25,18 +27,6 @@ uint32_t bitmap_stack_top = 0;
 
 mmap_entry_t* firstblock = NULL;
 struct multiboot_mmap_entry* main_block = NULL;
-
-static inline uint32_t div_ceil(uint32_t num, uint32_t den) {
-    return (num + den - 1) / den;
-}
-
-static inline uint32_t align_up(uint32_t address, uint32_t align) {
-    return div_ceil(address, align) * align;
-}
-
-static inline uint32_t align_down(uint32_t address, uint32_t align) {
-    return (address / align) * align;
-}
 
 static inline mmap_entry_t* alloc_bitmap_list()
 {
@@ -49,7 +39,7 @@ static inline mmap_entry_t* alloc_bitmap_list()
 // Binary search
 static inline void calc_blocks_and_bitmaps(uint32_t size, uint32_t* num_blocks, uint32_t* num_bitmaps)
 {
-    uint32_t max_blocks = size / BLOCK_SIZE;
+    uint32_t max_blocks = size / PAGE_SIZE;
     uint32_t min_blocks = 0;
     uint32_t blocks = 0;
     uint32_t bitmaps = 0;
@@ -71,91 +61,12 @@ static inline void calc_blocks_and_bitmaps(uint32_t size, uint32_t* num_blocks, 
     *num_bitmaps = div_ceil(blocks, UINT32BITS);
 }
 
-
-static inline void block_setstart(struct multiboot_mmap_entry* block, uint32_t new)
-{
-    int32_t old = new - block->addr;
-    block->addr = new;
-    block->len = (old > 0) ? (block->len - (uint32_t)old) : ((block->len - (uint32_t)(-old)));
-}
-
-static inline void block_addstart(struct multiboot_mmap_entry* block, uint32_t inc)
-{
-	block_setstart(block, block->addr + inc);
-}
-
-static inline void block_setend(struct multiboot_mmap_entry* block, uint32_t new)
-{
-    block->len = new - block->addr;
-}
-
-static inline uint32_t block_getend(struct multiboot_mmap_entry* block)
-{
-    return block->addr + block->len;
-}
-
-static inline void block_cut(struct multiboot_mmap_entry* block, uint32_t cut_start, uint32_t cut_end)
-{
-    if(block->type == MULTIBOOT_MEMORY_RESERVED)
-        return;
-    
-    if(block->addr_high != 0)
-        return;
-
-    if(cut_start > cut_end)
-    {
-        //exchange
-        uint32_t temp = cut_start;
-        cut_start = cut_end;
-        cut_end = temp;
-    }
-
-    //if the block does not intersect the cutting range, do nothing
-    if (block->addr >= cut_end || block_getend(block) <= cut_start)
-        return;
-
-    //if the block is entirely within the cutting range, mark it as reserved
-    if ((block->addr >= cut_start) && (block_getend(block) <= cut_end)) {
-        block->type = MULTIBOOT_MEMORY_RESERVED;
-        return;
-    }
-
-    //if the cutting range overlaps the beginning of the block
-    if (block->addr < cut_start && block_getend(block) > cut_start) {
-        block_setend(block, cut_start);
-    }
-
-    //if the cutting range overlaps the end of the block
-    if (block_getend(block) > cut_end && block->addr < cut_end) {
-        block_setstart(block, cut_end);
-    }
-
-    if(block->len == 0)
-        block->type = MULTIBOOT_MEMORY_RESERVED;
-}
-
-static inline void* block_alloc(struct multiboot_mmap_entry* block, uint32_t size)
-{
-    block_setend(block, block_getend(block) - size);
-    return (void*)block_getend(block);
-}
-
-static inline uint32_t is_block_under1mb(struct multiboot_mmap_entry* block)
-{
-    return block_getend(block) < 0x100000;
-}
-
-static inline uint32_t is_partofblock_under1mb(struct multiboot_mmap_entry* block)
-{
-    return block_getend(block) >= 0x100000 && block->addr < 0x100000;
-}
-
 static inline void block_adjust(struct multiboot_mmap_entry* block)
 {
     block_cut(block, 0, 0x100000);
     block_cut(block, (uint32_t)&vkernel_start, (uint32_t)&vkernel_end);
 
-    //Align addres of memory block to page size
+    //Align address of memory block to page size
     uint32_t alignedaddr = align_up(block->addr, PAGE_SIZE);
 
     if(alignedaddr >= block->addr + block->len)
@@ -172,7 +83,7 @@ static inline mmap_entry_t* pmm_initmemblock(struct multiboot_mmap_entry* block)
 {
     block_adjust(block);
     
-    uint32_t blocks = block->len / BLOCK_SIZE;
+    uint32_t blocks = block->len / PAGE_SIZE;
     uint32_t bitmaps = div_ceil(blocks, UINT32BITS);
 
     if(block->type == MULTIBOOT_MEMORY_RESERVED)
@@ -181,7 +92,7 @@ static inline mmap_entry_t* pmm_initmemblock(struct multiboot_mmap_entry* block)
     mmap_entry_t* entry = alloc_bitmap_list();
     entry->blocks_count = blocks;
     entry->first_block = (void*)((uint32_t)block->addr);
-    entry->first_bitmap = (uint32_t*)(block_alloc(main_block, bitmaps * sizeof(uint32_t)));
+    entry->first_bitmap = (uint32_t*)(block_fealloc(main_block, bitmaps * sizeof(uint32_t)));
     entry->last_search = 0;
     entry->next = NULL;
 
@@ -207,7 +118,7 @@ static inline mmap_entry_t* pmm_initmainblock()
     
     mmap_entry_t* entry = alloc_bitmap_list();
     entry->blocks_count = blocks;
-    entry->first_block = (void*)(align_up((uint32_t)block->addr + bitmaps * sizeof(uint32_t), BLOCK_SIZE));
+    entry->first_block = (void*)(align_up((uint32_t)block->addr + bitmaps * sizeof(uint32_t), PAGE_SIZE));
     entry->first_bitmap = (uint32_t*)((uint32_t)block->addr);
     entry->last_search = 0;
     entry->next = NULL;
@@ -368,7 +279,7 @@ void frame_free(void* addr, uint32_t count)
         if(addrint >= (uint32_t)current_block->first_block && addrint <= (uint32_t)current_block->first_block + current_block->blocks_count)
         {
             addrint -= (uint32_t)current_block->first_block;
-            addrint /= BLOCK_SIZE;
+            addrint /= PAGE_SIZE;
             uint32_t bitpos = addrint % 31;
             addrint -= bitpos;
             uint32_t bitmap_index = addrint / 32;

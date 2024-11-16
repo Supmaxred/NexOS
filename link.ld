@@ -1,8 +1,10 @@
+#include "inc/linker.h"
+
 OUTPUT_ARCH(i386);
 OUTPUT_FORMAT(elf32-i386);
-ENTRY(start)
+ENTRY(start);
 
-K_OFFSET = 0xC0000000;
+K_OFFSET = 0x00000000;
 
 SECTIONS
 {

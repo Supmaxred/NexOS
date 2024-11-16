@@ -35,7 +35,7 @@ void sleepms(uint32_t ms)
 
 void panic(char* str)
 {
-    LOG("\nKernel panic: %s", str);
+    LOGDBG("\nKernel panic: %s", str);
 
     cli();
     loop: hlt(); goto loop;
@@ -52,7 +52,6 @@ void kernel_main(multiboot_info_t* _multiboot)
     pckbd_init();
     pit_init();
     pit_setfreq(36);
-    //panic("lox");
 
     ke_systime = rtc_update();
 

@@ -20,6 +20,8 @@ extern uint32_t ke_systime;
 
 extern uint32_t vkernel_start;
 extern uint32_t vkernel_end;
+extern uint32_t pkernel_start;
+extern uint32_t pkernel_end;
 
 void sleepms(uint32_t ms);
 

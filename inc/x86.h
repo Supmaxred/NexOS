@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define GET_PDE_INDEX(va) (((uint32_t)(va) >> 22) & 0x3FF)
+
 #define DPL_KRNL 0x0
 #define DPL_USER 0x3
 
@@ -11,10 +13,24 @@
 
 #define NUMSEGS 5
 
+#define PAGE_SIZE 0x1000
+
+#define CR0_PE 1        // Protected Mode Enable
+#define CR0_MP 1 << 1   // Monitor co-processor
+#define CR0_EM 1 << 2   // x87 FPU Emulation
+#define CR0_TS 1 << 3   // Task switched
+#define CR0_ET 1 << 4   // Extension type
+#define CR0_NE 1 << 5   // Numeric error
+#define CR0_WP 1 << 16  // Write protect
+#define CR0_AM 1 << 18  // Alignment mask
+#define CR0_NW 1 << 29  // Not-write through
+#define CR0_CD 1 << 30  // Cache disable
+#define CR0_PG 1 << 31  // Paging
+
 typedef struct {
     uint16_t isr_low;           // The lower 16 bits of the ISR's address
     uint16_t gdt_cs;            // The GDT segment selector that the CPU will load into CS before calling the ISR
-    uint8_t res;                //Reserved
+    uint8_t res;                // Reserved
     uint8_t flags;              // Type and attributes; see the IDT page
     uint16_t isr_high;          // The higher 16 bits of the ISR's address
 } __attribute__((packed)) idt_entry_t;
@@ -25,18 +41,31 @@ typedef struct {
 } __attribute__((packed)) idtr_t;
 
 typedef struct {
-    uint32_t present     : 1;       // Page present in memory
-    uint32_t rw          : 1;       // Read/write flag
-    uint32_t us          : 1;       // User/supervisor flag
-    uint32_t pwt         : 1;       // Page-level write-through
-    uint32_t pcd         : 1;       // Page-level cache disable
-    uint32_t accessed    : 1;       // Accessed flag
-    uint32_t dirty       : 1;       // Dirty flag (only for 4 MB pages)
-    uint32_t page_size   : 1;       // Page size flag (0 = 4 KB, 1 = 4 MB)
-    uint32_t global      : 1;       // Global flag (only for 4 MB pages)
-    uint32_t avail       : 3;
-    uint32_t page_table_base : 20;  // Base address of the page table (aligned to 4 KB)
+    uint32_t present            : 1;    // Page present in memory
+    uint32_t rw                 : 1;    // Read/write flag
+    uint32_t us                 : 1;    // User/supervisor flag
+    uint32_t pwt                : 1;    // Page-level write-through
+    uint32_t pcd                : 1;    // Page-level cache disable
+    uint32_t a                  : 1;    // Accessed flag
+    uint32_t avl2               : 1;    // Available
+    uint32_t page_size          : 1;    // Page size flag (0 = 4 KB, 1 = 4 MB)
+    uint32_t avl                : 4;    // Available
+    uint32_t pt_base            : 20;   // Base address of the page table (aligned to 4 KB)
 } pde_t;
+
+typedef struct {
+    uint32_t present            : 1;    // Page present in memory
+    uint32_t rw                 : 1;    // Read/write flag
+    uint32_t us                 : 1;    // User/supervisor flag
+    uint32_t pwt                : 1;    // Page-level write-through
+    uint32_t pcd                : 1;    // Page-level cache disable
+    uint32_t a                  : 1;    // Accessed flag
+    uint32_t dirty              : 1;    // Dirty flag (only for 4 MB pages)
+    uint32_t pat                : 1;    // Page Attribute Table
+    uint32_t global             : 1;    // Global flag (TLB entry is not flushed on context switch)
+    uint32_t avl                : 3;    // Available
+    uint32_t pg_base            : 20;   // Base address of the page (aligned to 4 KB)
+} pte_t;
 
 typedef struct {
     uint16_t limit_low : 16;        // Low bits of segment limit

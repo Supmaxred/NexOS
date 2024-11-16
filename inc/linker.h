@@ -1,0 +1,5 @@
+#ifndef LINKER_H
+#define LINKER_H
+#define KERNEL_ADDR	0x100000
+#define VIRTUAL_OFFSET 0xC0000000
+#endif
