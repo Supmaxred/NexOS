@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "serialport.h"
 
-#define LOG_TYPE 2
+#define LOG_TYPE 1
 
 #define LOG_0 (void)
 #define LOG_1 sp_printf

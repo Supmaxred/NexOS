@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define GET_PDE_INDEX(va) (((uint32_t)(va) >> 22) & 0x3FF)
+#define GET_PTE_INDEX(va) (((uint32_t)(va) >> 12) & 0x3FF)
 
 #define DPL_KRNL 0x0
 #define DPL_USER 0x3

@@ -102,8 +102,6 @@ global start
 start:
     cli
 
-	;jmp uhgdt_flush
-
     lgdt [uh_gdtr] ; Load new GDT
 
     mov ax, 0x10

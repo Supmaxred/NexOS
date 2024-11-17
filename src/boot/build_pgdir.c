@@ -5,16 +5,20 @@
 #include "compiler.h"
 #include "mem.h"
 #include "ke.h"
+#include "log.h"
+#include "string.h"
 
 void build_pgdir(multiboot_info_t* _multiboot)
 {
+    LOGDBG("HI!!!")
+;
     multiboot_info_t* _multiboot_rm = (multiboot_info_t*)((uintptr_t)_multiboot + VIRTUAL_OFFSET);
     struct multiboot_mmap_entry* main_block = NULL;
     uint32_t max_len = 0;
     
     for (size_t i = 0; i < _multiboot_rm->mmap_length; i += sizeof(struct multiboot_mmap_entry))
     {
-        struct multiboot_mmap_entry* me = (struct multiboot_mmap_entry*)(_multiboot_rm->mmap_addr + i) + VIRTUAL_OFFSET;
+        struct multiboot_mmap_entry* me = (struct multiboot_mmap_entry*)((uintptr_t)(_multiboot_rm->mmap_addr + i) + VIRTUAL_OFFSET);
         if (me->type == MULTIBOOT_MEMORY_AVAILABLE && me->len > max_len && !is_block_under1mb(me)) {
             max_len = me->len;
             main_block = me;
@@ -44,11 +48,11 @@ void build_pgdir(multiboot_info_t* _multiboot)
     uint32_t num_pages = div_ceil((uint32_t)&pkernel_end, PAGE_SIZE);
     uint32_t num_page_tables = div_ceil(num_pages, PAGE_ENTRIES);
 
-    uint32_t* pgdir = (uint32_t*)block_fsalloc(main_block, PAGE_SIZE) + VIRTUAL_OFFSET;
+    uint32_t* pgdir = (uint32_t*)((uintptr_t)block_fsalloc(main_block, PAGE_SIZE) + VIRTUAL_OFFSET);
     memset(pgdir, 0, PAGE_SIZE);
 
     for (uint32_t i = 0; i < num_page_tables; i++) {
-        uint32_t* pagetable = (uint32_t*)block_fsalloc(main_block, PAGE_SIZE) + VIRTUAL_OFFSET;
+        uint32_t* pagetable = (uint32_t*)((uintptr_t)block_fsalloc(main_block, PAGE_SIZE) + VIRTUAL_OFFSET);
         memset(pagetable, 0, PAGE_SIZE);
 
         uint32_t pgdir_entry = ((uint32_t)pagetable - VIRTUAL_OFFSET) | PAGE_PRESENT | PAGE_WRITE;
@@ -64,12 +68,12 @@ void build_pgdir(multiboot_info_t* _multiboot)
             
             pagetable[j] = phys_addr | PAGE_PRESENT | PAGE_WRITE;
             if (j == 0) {
-                pgdir[(virt_addr >> 22) & 0x3FF] = pgdir_entry;
-                pgdir[(phys_addr >> 22) & 0x3FF] = pgdir_entry;
+                pgdir[GET_PDE_INDEX(virt_addr)] = pgdir_entry;
+                pgdir[GET_PDE_INDEX(phys_addr)] = pgdir_entry;
             }
         }
     }
     
-    lcr3(pgdir - VIRTUAL_OFFSET);
-    lcr0(gcr0() | CR0_PG);
+    lcr3((uint32_t*)((uintptr_t)pgdir - VIRTUAL_OFFSET));
+    lcr0(gcr0() | CR0_PG | CR0_WP | CR0_NE | CR0_MP);
 }

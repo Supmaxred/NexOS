@@ -45,9 +45,11 @@ void kernel_main(multiboot_info_t* _multiboot)
 {
     mb = _multiboot;
 
+    gdt_init();
+
+    LOGDBG("HI!");
     init_serial();
     fb_init();
-    gdt_init();
     idt_init();
     pckbd_init();
     pit_init();

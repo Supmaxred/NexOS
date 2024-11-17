@@ -7,7 +7,6 @@ gdtr_t gdtr;
 
 void gdt_init()
 {
-    LOG_STEP_START("Initializing GDT");
     gdtr.offset = (uintptr_t)&gdt_table;
     gdtr.limit = sizeof(gdt_table) - 1;
 
@@ -18,5 +17,4 @@ void gdt_init()
     gdt_setgate(&gdt_table[4], 0x0, 0xFFFFF, DPL_USER, 0, IS_DS);
 
     gdt_flush(&gdtr);
-    LOG_STEP_END();
 }
