@@ -43,11 +43,12 @@ void panic(char* str)
 
 void kernel_main(multiboot_info_t* _multiboot)
 {
-    mb = _multiboot;
+    mb = (uintptr_t)_multiboot - VIRTUAL_OFFSET;
 
     gdt_init();
 
-    LOGDBG("HI!");
+    panic("AA!!");
+    
     init_serial();
     fb_init();
     idt_init();

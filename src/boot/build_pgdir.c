@@ -10,8 +10,6 @@
 
 void build_pgdir(multiboot_info_t* _multiboot)
 {
-    LOGDBG("HI!!!")
-;
     multiboot_info_t* _multiboot_rm = (multiboot_info_t*)((uintptr_t)_multiboot + VIRTUAL_OFFSET);
     struct multiboot_mmap_entry* main_block = NULL;
     uint32_t max_len = 0;
@@ -31,7 +29,7 @@ void build_pgdir(multiboot_info_t* _multiboot)
     }
 
     block_cut(main_block, 0, 0x100000);
-    block_cut(main_block, (uint32_t)&vkernel_start, (uint32_t)&vkernel_end);
+    block_cut(main_block, (uint32_t)&pkernel_start, (uint32_t)&pkernel_end);
 
     //Align address of memory block to page size
     uint32_t alignedaddr = align_up(main_block->addr, PAGE_SIZE);
