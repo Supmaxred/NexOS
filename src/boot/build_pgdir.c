@@ -13,7 +13,8 @@ void build_pgdir(multiboot_info_t* _multiboot)
     multiboot_info_t* _multiboot_rm = (multiboot_info_t*)((uintptr_t)_multiboot + VIRTUAL_OFFSET);
     struct multiboot_mmap_entry* main_block = NULL;
     uint32_t max_len = 0;
-    
+
+    // Finding largest memory map entry
     for (size_t i = 0; i < _multiboot_rm->mmap_length; i += sizeof(struct multiboot_mmap_entry))
     {
         struct multiboot_mmap_entry* me = (struct multiboot_mmap_entry*)((uintptr_t)(_multiboot_rm->mmap_addr + i) + VIRTUAL_OFFSET);
@@ -28,7 +29,9 @@ void build_pgdir(multiboot_info_t* _multiboot)
         return;
     }
 
-    block_cut(main_block, 0, 0x100000);
+    block_cut(main_block, 0, 0x100000); // We dont want free memory below 1MB
+
+    //We want to cut kernel part from free part
     block_cut(main_block, (uint32_t)&pkernel_start, (uint32_t)&pkernel_end);
 
     //Align address of memory block to page size
@@ -49,6 +52,7 @@ void build_pgdir(multiboot_info_t* _multiboot)
     uint32_t* pgdir = (uint32_t*)((uintptr_t)block_fsalloc(main_block, PAGE_SIZE) + VIRTUAL_OFFSET);
     memset(pgdir, 0, PAGE_SIZE);
 
+    // Building Page Directory
     for (uint32_t i = 0; i < num_page_tables; i++) {
         uint32_t* pagetable = (uint32_t*)((uintptr_t)block_fsalloc(main_block, PAGE_SIZE) + VIRTUAL_OFFSET);
         memset(pagetable, 0, PAGE_SIZE);
@@ -57,9 +61,6 @@ void build_pgdir(multiboot_info_t* _multiboot)
 
         for (uint32_t j = 0; j < PAGE_ENTRIES; j++) {
             uint32_t page_num = i * PAGE_ENTRIES + j;
-
-            if(page_num >= num_pages)
-                break;
 
             uint32_t phys_addr = page_num * PAGE_SIZE;
             uint32_t virt_addr = VIRTUAL_OFFSET + phys_addr;
